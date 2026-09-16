@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en" data-page-node-id="KQ84uC9IkADcUWsnVALCjw">
+  <head data-page-node-id="N5h58KOkwUiiSrMWCstg42">
+    <meta charset="UTF-8" data-page-node-id="HrqJqQmXynT6b5D1Hfl7jJ" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="kpMP5dlG1KiCnUlFULV5UG" />
+    <meta name="description" content="CCN Cross-Border Bandwidth customer architecture walkthrough and validation demonstrator" data-page-node-id="BN8B4al4eDevKZPNb2Kxds" />
+    <title>CCN Cross-Border Bandwidth | Customer Demo</title>
+    <link rel="stylesheet" href="styles.css" data-page-node-id="m0f7T7Zl2PpwkPhPjBUHk1" />
+    <script src="demo-config.js"></script>
+  </head>
+  <body data-page-node-id="QjONPem71naMQIt14WlYTt">
+    <a class="skip-link" href="#demo" data-page-node-id="9gMku5WF3NIWr1aHHEfoin">Skip to interactive demo</a>
+
+    <main class="page-shell" data-page-node-id="ls217KPtLANTEpBWEBSURr">
+      <header class="topbar" data-page-node-id="66HvJUBWC6ir3QtqGY25p9">
+        <a class="brand" href="#top" aria-label="CCN Cross-Border Bandwidth demo home" data-page-node-id="xGQn65Gg0XLARcA7iPSvAo">
+          <span class="brand-mark" aria-hidden="true" data-page-node-id="KAm3ZduUBvxoGAZMChhofE"><i data-page-node-id="KOQ0PzPvLAdzOTqmgat5vx"></i><i data-page-node-id="IrVmz4XrA2AjtwEXRYGMwM"></i><i data-page-node-id="GyHc3Etu79ypbCN1DczyDv"></i></span>
+          <span data-page-node-id="tNW2B9n1C9JYwUQ7EAJGbT">Tencent Cloud <b data-page-node-id="yypmgXfEZA8i33aKy0MbrS">CCN</b></span>
+        </a>
+        <span class="topbar-note" data-page-node-id="rCpJU9d4iEFTq4avGtxYzK">CROSS-BORDER BANDWIDTH · CUSTOMER WALKTHROUGH</span>
+      </header>
+
+      <section id="top" class="hero" aria-labelledby="hero-title" data-page-node-id="Kd6dgF7bAYBAD8VBCMT2KE">
+        <div class="eyebrow" data-page-node-id="AEBrgsaABZQqSGgSHLKNIZ">CCN CROSS-BORDER BANDWIDTH</div>
+          <h1 id="hero-title" data-page-node-id="XGQbYV7p3IEFQoFntyY78c">Compare Direct and <em data-page-node-id="bRrCDSESCqn6qwAKU7A9XI">routed ACK paths.</em></h1>
+          <p class="hero-lede" data-page-node-id="8IJ0DPJUCZZRHVZgEijLx5">Compare a Public Internet Direct baseline with a configured Guangzhou ingress → CCN → US private-origin Command-to-ACK path.</p>
+
+        <div class="architecture-strip" aria-label="CCN Cross-Border Bandwidth architecture" data-page-node-id="g7HY1UoGClhL2llOMpgpXa">
+          <div data-page-node-id="4srgnHno6cICTmB5pmBl5y"><b data-page-node-id="ADCC1J2IjUt05XOKHka0kE">CN</b><span data-page-node-id="eh23Cds2CzlmyncJIm68ss">China Mainland<br  data-page-node-id="LOB9clWRIhEGL7XWMfGusD"/>Client</span></div>
+          <i aria-hidden="true" data-page-node-id="Ge2d7E23kDToBDDE1fhYjD"></i>
+          <div data-page-node-id="OELFuTGfPPv4NDAcN79vVJ"><b data-page-node-id="GY9WzzHyUEC9h1SSFh63Gv">01</b><span data-page-node-id="azIWiDwczvqwosyjUOD7cL">Guangzhou<br  data-page-node-id="PfBPERVOAd5lLlPVMiI5Y9"/>Ingress</span></div>
+          <i class="ccn-link" aria-hidden="true" data-page-node-id="yiqqSz19nmysB8Sw0R2Hkg"><small data-page-node-id="ZHYn8e8Ug78pAlI7jCQg3X">CCN</small></i>
+          <div class="ccn-stage" data-page-node-id="KDnOSszrDERtN0qPH1LWkx"><b data-page-node-id="mDn0oqP7i7GTa413kmmJ6E">02</b><span data-page-node-id="XMTm2dqcDCJ6oR7Sowhzs4">CCN Cross-Border<br  data-page-node-id="npryLC5ilTmUGGqVSdiTFf"/>Bandwidth</span></div>
+          <i class="ccn-link" aria-hidden="true" data-page-node-id="iKIEBzTk3UykNKSNoKBInK"></i>
+          <div data-page-node-id="FPa639dOgGCh8DCoRBQMpt"><b data-page-node-id="50omYxarcxe8zRf4BET4dG">03</b><span data-page-node-id="62CkSsn71842zKN79oFqAB">US VPC<br  data-page-node-id="yBqBC7hjb3Unw96KRKZKFw"/>Egress</span></div>
+          <i aria-hidden="true" data-page-node-id="TQVSwvV0MgQ6TlsugMjaQJ"></i>
+          <div data-page-node-id="jbGOBGjWojn4vQPpw022La"><b data-page-node-id="Cnl7EoGU5Zc14NpYEfHNyx">US</b><span data-page-node-id="MqP8hMXer2NpR5ctiDjtkj">Same US<br  data-page-node-id="irpk2SERo369nuBMiesSmK"/>Origin</span></div>
+        </div>
+
+        <div class="hero-proof" data-page-node-id="Knb4FcYBjnnilXwO7bgjZ7">
+          <span class="proof-dot" aria-hidden="true" data-page-node-id="pnBfBysL80S35sbVPRgSdT"></span>
+          <p data-page-node-id="PQ0fRjw5knvr2JxTEcNiNq"><strong data-page-node-id="VolgrWqQ9tKMQLunjl30ps">What this demo proves:</strong> the operating model and a fair test method — not a performance claim.</p>
+        </div>
+      </section>
+
+      <section class="deployment-status" aria-live="polite" aria-label="Demo connection status">
+        <span id="deployment-status-label">ARCHITECTURE WALKTHROUGH</span>
+        <p id="deployment-status-copy">No live Direct endpoint is configured. This page is currently an architecture walkthrough.</p>
+      </section>
+
+      <section id="demo" class="demo-intro" aria-labelledby="demo-title" data-page-node-id="pMKTeQYskLqlVNXZ4L83eO">
+        <div data-page-node-id="lM9waIzixWR5Zic7F4kbHk">
+          <span class="section-number" data-page-node-id="oqgn3iDSYVy7DgBlcwUT50">01</span>
+          <h2 id="demo-title" data-page-node-id="ccc4OG547i81ZJf6ApcqVb">Choose the path to inspect.</h2>
+        </div>
+        <p data-page-node-id="Mz6Xv1LreXktYyUlG37x3P">Both paths must reach the same US origin. The difference is the cross-border path being evaluated.</p>
+      </section>
+
+      <section class="mode-selector" aria-label="Choose the demonstration path" data-page-node-id="R0cMK69w4Qk3ictpbkdDCO">
+        <div class="mode-buttons" role="radiogroup" aria-label="Demonstration path" data-page-node-id="BoVTWyX2R9mih5uuV2vsZI">
+          <button class="path-button" type="button" data-mode="direct" role="radio" aria-checked="false" data-page-node-id="wcQVoXUlMgqAMf3yyaoSm4">
+            <span class="path-index" data-page-node-id="LOmWfAH8WFMvfI6Mqq541I">A</span>
+            <span data-page-node-id="XBRAtXwEgOHHn8cl6QBUaW"><strong data-page-node-id="b8LjQs6YmDuYDAq651EvMg">Public Internet Direct</strong><small data-page-node-id="vZwCpX9UlB0lXX71VJ3W6f">Uncontrolled public route</small></span>
+            <span class="mode-state" data-page-node-id="kC9uL9q17oYHSCBhcLXEjd">Select</span>
+          </button>
+          <button class="path-button active" type="button" data-mode="accelerated" role="radio" aria-checked="true" data-page-node-id="1iSBg9kymzNKvDZKeBZwdd">
+            <span class="path-index" data-page-node-id="2q7FB1dWBP5kOC1qH3yAFF">B</span>
+            <span data-page-node-id="MvbmI8Nuc0FWgJC0qO1xRJ"><strong data-page-node-id="JFtqKXLRbAdUjedYWEfm0N">CCN Cross-Border Bandwidth</strong><small data-page-node-id="VIqHaSgQnORgS1hJ2Lt11V">China ingress → CCN → US egress</small></span>
+            <span class="mode-state" data-page-node-id="ykRtxrytcQG4VegkM0TfHG">Selected</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="trace-panel mode-accelerated" id="live-trace" aria-labelledby="trace-title" data-page-node-id="ZIXjYM7HJRRkC1bAYMTzZm">
+        <div class="trace-heading" data-page-node-id="iGfhEaxcfBMB0fS3PVHCxf">
+          <div data-page-node-id="D5dT5Xm9BrNBNqQux6u6at">
+            <p class="eyebrow" data-page-node-id="Sak7AUIRVKQTamCIeLOPDt">LIVE PATH WALKTHROUGH</p>
+            <h2 id="trace-title" data-page-node-id="WZUm3Kfm6Dl3kepIBDS0T0">Current: CCN Cross-Border Bandwidth Path</h2>
+          </div>
+          <span id="trace-mode-tag" class="path-tag accelerated" data-page-node-id="pwuF8h7YbW3dq6FtF57fAP">CCN PATH</span>
+        </div>
+        <p id="trace-summary" class="trace-summary" data-page-node-id="Q3DFzPlmMtBDBVSG0H0AUp">A designed logical path: China Mainland ingress, CCN Cross-Border Bandwidth, and US egress to the Same US Origin. All states for this path are simulated in this deliverable.</p>
+
+        <div class="trace-route direct-route" data-route="direct" hidden data-page-node-id="tkwyDruS1tVuDn7EewrZwq">
+          <article class="trace-node" data-step="client" data-page-node-id="WOBcqLGf2fAxAFfgvB7YsX"><b data-page-node-id="zCAJsdDwv2PAcabW2D6zLu">CN</b><h3 data-page-node-id="r9XTQjucRUj2gfp0GweuNP">Client</h3><p data-page-node-id="cSk6jKdV2saLZ4aQ86plV8">China Mainland</p></article>
+          <i class="route-line" aria-hidden="true" data-page-node-id="ioBuyUBkCqxGe92Bf7udpE"></i>
+          <article class="trace-node muted-node" data-step="public" data-page-node-id="CNWqthYTQtfFMhDB5H0MKH"><b data-page-node-id="fdXVaAk9A0GJcf9PPdmHOp">?</b><h3 data-page-node-id="xI5IksS0XtBnBvNMGCAQs7">Public Internet</h3><p data-page-node-id="p4juGyqbPn3C66tzx3h0Nl">Uncontrolled path</p></article>
+          <i class="route-line" aria-hidden="true" data-page-node-id="KrmWVfQ51ESzjswvAGWZJK"></i>
+          <article class="trace-node" data-step="origin" data-page-node-id="CvDhDA9AEwNX21Dxsrqet0"><b data-page-node-id="tGo7XzoogdJtJzLgIlYxzV">US</b><h3 data-page-node-id="lE3pwk1DETAi3tkbCoHCXq">Same US Origin</h3><p data-page-node-id="79B7UFztIBJG9GGTLltEy2">ACK target</p></article>
+        </div>
+
+        <div class="trace-route solution-route" data-route="accelerated" data-page-node-id="nOfddRd2jGSwq07ZhF3aot">
+          <article class="trace-node" data-step="client" data-page-node-id="dam8PC0EV4CRsNutWtJD9V"><b data-page-node-id="zwHdIvF3M5yeZscVkO6aXk">CN</b><h3 data-page-node-id="WN6TKVI8QNcqUD8f9EDEiz">Client</h3><p data-page-node-id="4wBPS7q0j8SVU9wuJWNaXe">China Mainland</p></article>
+          <i class="route-line" aria-hidden="true" data-page-node-id="puBxi8CzcT3nGQ6k5NHKtR"></i>
+          <article class="trace-node" data-step="ingress" data-page-node-id="3GvcuKqUl0pyZVeCeMHsnO"><b data-page-node-id="WDH0LU3tgk0jNyjWz11ApW">01</b><h3 data-page-node-id="Tm3FFwGGDlTd5zZgmw0sNj">Ingress</h3><p data-page-node-id="cBzm0eWOd6ikkPnV4zUvPK">Guangzhou EIP + CVM</p></article>
+          <i class="route-line ccn-line" aria-hidden="true" data-page-node-id="MBdLDiemRisRQOd8BmeGH2"></i>
+          <article class="trace-node ccn-node" data-step="ccn" data-page-node-id="L9PAD4rIotIbM7zOQMSCnp"><b data-page-node-id="2BBJMaFYDhgWW4hykRGJ3S">02</b><h3 data-page-node-id="TVAGcwHtICNhKznD3oN28v">CCN Bandwidth</h3><p data-page-node-id="TqHC6VVFX8cn4jyhhVowtE">Approval required</p></article>
+          <i class="route-line ccn-line" aria-hidden="true" data-page-node-id="YN0ik0oMQVUJcmzWKjtxI2"></i>
+          <article class="trace-node" data-step="egress" data-page-node-id="ItXBCFwnnNdqX14NtL2tgl"><b data-page-node-id="FqZ67BoXzkERSyXl38jrV4">03</b><h3 data-page-node-id="c87lSkC88RHXCEAMXlrhFQ">US Egress</h3><p data-page-node-id="9A2O8QYRMrFZ1S0fFuoztj">EIP + CVM/SNAT</p></article>
+          <i class="route-line" aria-hidden="true" data-page-node-id="RCcw3ASgiJN8jAmDkHJ5VC"></i>
+          <article class="trace-node" data-step="origin" data-page-node-id="onMGT5Kp8wEl9ERbtpIRR0"><b data-page-node-id="Wf6qgy0fnMBG4dKj4tu10e">US</b><h3 data-page-node-id="eI3pryZUW7kX6o71DxQpct">Same US Origin</h3><p data-page-node-id="wk7tdPlYSy01rihMzHphpM">ACK target</p></article>
+        </div>
+
+        <div class="trace-status" role="status" aria-live="polite" data-page-node-id="Wqnw2p4MhHLBDEI2wDOZXR">
+          <span class="status-dot" aria-hidden="true" data-page-node-id="P8Ss4gHvF3fGakI7RTbnUt"></span>
+          <div data-page-node-id="ZEu9MAxEoP4LppeBI1W39C"><span id="trace-source-label" data-page-node-id="q6CXoMoMfHVRkrRGGWggbf">SIMULATED</span><strong id="trace-status" data-page-node-id="QCa5yiN63sWnkFRaWc1O1g">Path ready: send a game command to display the simulated Command-to-ACK return state.</strong></div>
+        </div>
+      </section>
+
+      <section class="test-area" aria-labelledby="command-title" data-page-node-id="B11QIkVAtW1mXwwMKdpRsH">
+        <article id="command-card" class="command-card" data-page-node-id="759QbtVxd1fkd0CSqd2csu">
+          <div class="test-heading" data-page-node-id="CC2qYbLBKOeHBQdGdNGJOV">
+            <span class="section-number" data-page-node-id="8PtoZCCzf9rzxEEjslkjkx">02</span>
+            <div data-page-node-id="gv3ERqCz15CzpELWSmxEnP"><p class="eyebrow" data-page-node-id="cpRzj13XC96TNClRneCuJF">COMMAND-TO-ACK TEST</p><h2 id="command-title" data-page-node-id="0Sviwon7WRj7RqzWlvkpQ1">Send a test command.</h2></div>
+            <div class="command-counter" data-page-node-id="AVEoM6uMORirG1XNoBNT5T"><strong id="command-number" data-page-node-id="nAo9geQyn7ml1pbc8IedsP">01</strong><span data-page-node-id="OWzQyu3MJoVHgitZdIpFoy">/ 10</span></div>
+          </div>
+          <div class="command-stage" data-page-node-id="U38hOU34AvfEgfNZoEVUK2">
+            <p class="stage-kicker" data-page-node-id="0Cz5dn4MPyENWJbB5ksmj5">SOURCE-LABELED ACK LIFECYCLE</p>
+            <h3 id="command-stage-title" data-page-node-id="GfI3dBllFbCZ2Lv9MH8Tb3">Path ready</h3>
+            <p id="command-stage-copy" data-page-node-id="PoCVM8q8qhtdrE5dDh4aAB">Send a command through the selected path. A real sample is recorded only when the configured endpoint returns a matching ACK.</p>
+            <div id="ack-overlay" class="ack-overlay" hidden aria-hidden="true" data-page-node-id="MzKIRaPFE9YXdaklKuJd4c"><span class="relay-spinner" aria-hidden="true" data-page-node-id="zmy9Aq4dEMnl6TFwxS7sOy"></span><p data-page-node-id="bYXnwKXXHaN0S1r7vZqsOt">Tracing command and acknowledgement…</p></div>
+          </div>
+          <div class="command-actions" data-page-node-id="TlfEyhx6bAUnvO5uCYuFW1">
+            <button id="fire-command-button" class="fire-command-button" type="button" data-page-node-id="ZSB47kMbaAPeBtjtxW8mcp">SEND TEST COMMAND <span data-page-node-id="hT8njtBAYdl7HdijaOP4XB">/ SIMULATED</span></button>
+            <button id="batch-command-button" class="batch-command-button" type="button" data-page-node-id="BrUy0jh5rO2hXG0bS2F5om">RUN 10-COMMAND TEST</button>
+          </div>
+          <div class="command-footer" data-page-node-id="1nKmx4Wj9fYMRKwmVk543f">
+            <span data-page-node-id="a3YRATs0RThxSHVom7CYkw">ACK status <strong id="live-ack" data-page-node-id="NjidLFGoheANYzKINveLHe">Waiting for command</strong></span>
+            <span data-page-node-id="spO0AgUtIIGB67idnfPBXC">Flow <strong id="live-flow" data-page-node-id="oHzFKVa6Q1dFHSCxiCjnGD">Path ready</strong></span>
+            <button id="reset-button" class="reset-button" type="button" data-page-node-id="FyoZHdfCPUQCoFg7iItRNB">Reset</button>
+          </div>
+          <p id="command-announcement" class="sr-only" aria-live="assertive" data-page-node-id="vPVkNO5euFcIeOvYJTRITU"></p>
+        </article>
+
+        <aside class="result-panel" aria-labelledby="result-title" data-page-node-id="2xAMRjDrbb40DlCBNefsql">
+          <p class="eyebrow" data-page-node-id="kJcXwMeNZITAJaaGEKi4ib">TEST READOUT</p>
+          <div class="result-heading" data-page-node-id="IrkOdgdvFD8lCfb3xHwyoY"><h2 id="result-title" data-page-node-id="wv4Ad1QFX9HLS21bJppWDh">Acknowledgement</h2><span id="result-mode-tag" class="path-tag accelerated" data-page-node-id="UnkrqWhhqGaoA4FFGSvifl">CCN PATH</span></div>
+          <div class="completion-readout" data-page-node-id="EFx57U4HFDXhIohgz7tDhS"><span id="result-readout-label" data-page-node-id="w81HiSDQH3QR8o69pjWJxq">SIMULATED ACK</span><strong id="latest-total" data-page-node-id="eWiYHs3PqCENjHEBVVzaBx">—</strong><small data-page-node-id="oDJbzqvwR5HMBq6iIOJODp">Source-separated; simulated states are not network telemetry.</small></div>
+          <dl class="command-details" data-page-node-id="B54wV5Mkuuj1B5UEGFCDgf">
+            <div data-page-node-id="xIdAl0b4Fqln1vpYMwwM5F"><dt data-page-node-id="HvFm6ZJ1SL6ANLt1N2Bqrb">Command</dt><dd id="latest-command" data-page-node-id="sfW0Vnd7qJb5qgx2Tx2CCY">—</dd></div>
+            <div data-page-node-id="HGQRIorcxkm1kDWfqEHVZj"><dt data-page-node-id="alLlgkn8q12wWoCwr9cHC9">ACK event</dt><dd id="latest-ack" data-page-node-id="1vsnDIrZzZZBGqzFJNwnJm">—</dd></div>
+            <div data-page-node-id="Qk4AAsBGGEKsNBmvxySZCA"><dt data-page-node-id="YAEhTJhEZxDryV96haaDpi">Status</dt><dd id="latest-status" data-page-node-id="d04R6uv4LgBiMpR1Y5WXjv">Waiting to send</dd></div>
+          </dl>
+          <div class="ack-count" data-page-node-id="0Q767Ruj698KXR4nMeC6CP"><span data-page-node-id="MWJ0aORWIvLyzWpFCuxPlY">Confirmed acknowledgements</span><strong id="ack-count" data-page-node-id="ZfEoaRHuFH0vNxnNahv6Dx">0</strong></div>
+        </aside>
+      </section>
+
+      <section class="validation-note" aria-labelledby="validation-title" data-page-node-id="nEWlNKCSoXjcu1XNi4tILf">
+        <span class="section-number" data-page-node-id="FRldcEJekQZ8XGMBiJOng0">03</span>
+        <div data-page-node-id="DEAfWkfCUJoaRUcOJZAu0P">
+          <p class="eyebrow" data-page-node-id="bcDPxv5xuYCzzyThcX9VGL">POC SUCCESS METHOD</p>
+          <h2 id="validation-title" data-page-node-id="0SR3aidTIpREzfob1iagJy">Keep the comparison fair.</h2>
+        </div>
+        <p data-page-node-id="nzNmjS9tQCUgUYXeZGYDQk"><b data-page-node-id="ElFEwExinYj9ArqsoiMQV5">Same client</b><b data-page-node-id="wFWnqncw5Cblf4eu9hiWmP">Same US origin</b><b data-page-node-id="IHOO43DSi2wKvQys76KGUo">Same payload</b><b data-page-node-id="EzDGCaVmtGsEIbrq9f8hTB">Two endpoints</b><b data-page-node-id="lQIMfakMrZWkMGE4SsxIMx">Compare raw ACK records</b></p>
+      </section>
+
+      <footer data-page-node-id="xucYkkBVgUek3PWOPRuZ9P">
+        <span id="global-demo-badge" data-page-node-id="zVUa7Hi3FNuGnUy2Sdrvwh">CCN PATH · SIMULATED</span>
+        <p data-page-node-id="yGWIL1e3dcQJcz6I2M4emo">CCN Cross-Border Bandwidth is subject to applicable compliance approval. This build records real application ACK RTT only for an explicitly configured Direct endpoint; it does not present CCN performance results.</p>
+      </footer>
+
+      <div class="compatibility-state" aria-hidden="true" data-page-node-id="1KK9qtTglEzkuj1fC8TN97">
+        <span id="telemetry-source-badge" data-page-node-id="UBH8nmvUE4RKvYgHx7ccx9"></span><span id="telemetry-connection" data-page-node-id="PMR54uEWm2EtnjElAVesrN"></span><span id="telemetry-detail" data-page-node-id="REdK9glWex7HVyyflbMSAe"></span><span id="telemetry-boundary" data-page-node-id="B38EZAOYPUXBqqEjUHBhAu"></span>
+        <span id="result-detail-label" data-page-node-id="Zd4YNArRGFrBoSnotJYbzp"></span><span id="result-count-label" data-page-node-id="hBmLOP8MHb3KQTlT9rcK7k"></span><span id="metrics-kicker" data-page-node-id="7lKqSJ9Q9zKcCA4a9DE6gg"></span><span id="metrics-note" data-page-node-id="F40cgEdAdNJv7VwKaQrDht"></span>
+        <span id="sample-count" data-page-node-id="M1548sVBFlNfUCmY4RKYiL"></span><span id="metric-sent" data-page-node-id="boK5p545mjSlhDUJUeiRCl"></span><span id="metric-ack" data-page-node-id="AHGR2WijGwFH2ornQgaMmq"></span><span id="metric-sent-detail" data-page-node-id="LHBnlFAyYNZoHDoxkVdzSW"></span><span id="metric-ack-detail" data-page-node-id="aPaapQd3Yo0iY1IDArfYpE"></span><span id="metric-cap" data-page-node-id="3mRc0F9H74atqFj0nnuMqN"></span>
+      </div>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

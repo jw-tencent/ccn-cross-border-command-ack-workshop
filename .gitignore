@@ -1,0 +1,32 @@
+# Secrets and certificates
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+
+# Deployment-local endpoint configuration
+app/demo-config.local.js
+app/demo-config.production.js
+
+# Terraform state and local provider data
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.*
+plan.out
+crash.log
+crash.*.log
+terraform.tfvars
+*.auto.tfvars
+!infra/terraform/terraform.tfvars.example
+
+# Dependencies and editor files
+node_modules/
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,54 @@
+# Reference only. Replace all example values before use.
+# This ingress intentionally exposes only /healthz and /ws. The root path returns 404.
+
+upstream us_private_origin {
+    # Replace with the private IP or private DNS name of the US origin in the connected VPC.
+    server 10.20.0.10:443;
+    keepalive 16;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name ccn-path.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/ccn-path.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/ccn-path.example.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    location / {
+        return 404;
+    }
+
+    location = /healthz {
+        proxy_pass https://us_private_origin;
+        proxy_set_header Host demo.example.com;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_ssl_server_name on;
+        proxy_ssl_name demo.example.com;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        # Keep verification on. Increase only if the verified certificate chain requires it.
+        proxy_ssl_verify_depth 10;
+    }
+
+    location = /ws {
+        proxy_pass https://us_private_origin;
+        proxy_http_version 1.1;
+        proxy_set_header Host demo.example.com;
+        proxy_set_header Origin $http_origin;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_buffering off;
+        proxy_read_timeout 10m;
+        proxy_send_timeout 10m;
+        proxy_ssl_server_name on;
+        proxy_ssl_name demo.example.com;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        proxy_ssl_verify_depth 10;
+    }
+}

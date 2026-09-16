@@ -1,0 +1,10 @@
+project_name = "ccn-command-ack-demo"
+china_region = "ap-guangzhou"
+us_region    = "na-siliconvalley"
+
+# These CIDRs must not overlap.
+china_vpc_cidr = "10.10.0.0/16"
+us_vpc_cidr    = "10.20.0.0/16"
+
+demo_domain   = "demo.example.com"
+routed_domain = "ccn-path.example.com"

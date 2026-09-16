@@ -1,0 +1,15 @@
+{
+  "name": "ccn-cross-border-command-ack-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A truthful browser Command-to-ACK application RTT demo for Direct and configured CCN-routed paths.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "start": "node server/server.js",
+    "check": "node --check server/server.js && node --check server/server.test.js && node --check server/client-static.test.js && node --check server/smoke.js && node --check app/app.js",
+    "test": "node --test server/server.test.js server/client-static.test.js && node server/smoke.js",
+    "smoke": "npm run check && npm test"
+  }
+}
