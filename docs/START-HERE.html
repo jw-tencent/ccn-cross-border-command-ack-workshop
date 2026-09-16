@@ -14,7 +14,7 @@
     <article class="card avoid"><h3>What CCN is not</h3><p>It is not a browser plug-in, a DNS switch, or a number that turns a browser ACK sample into a network-latency or SLA claim.</p></article>
   </section>
 
-  <section class="statement"><div class="section-label">When this demo fits</div><h2>Use it to learn a controlled private segment—not to make a generic speed claim.</h2><p><strong>Good fit:</strong> China Mainland users entering a US-hosted application through a Guangzhou front door; multi-region VPC private connectivity; a customer walkthrough that keeps the same application origin for Direct and routed testing.</p><p><strong>Not a fit by itself:</strong> a one-server static website, generic CDN caching, an overseas-user-to-China-site pattern, or a browser-latency benchmark without comparable China Mainland client conditions.</p><p><a href="ccn-basics.md">Read CCN basics for first-time customers →</a></p></section>
+  <section class="statement"><div class="section-label">When this demo fits</div><h2>Use it to learn a controlled private segment—not to make a generic speed claim.</h2><p><strong>Good fit:</strong> China Mainland users entering a US-hosted application through a Guangzhou front door; multi-region VPC private connectivity; a customer walkthrough that keeps the same application origin for Direct and routed testing.</p><p><strong>Not a fit by itself:</strong> a one-server static website, generic CDN caching, an overseas-user-to-China-site pattern, or a browser-latency benchmark without comparable China Mainland client conditions.</p><p><a href="START-HERE.md">Follow the full beginner workshop →</a></p></section>
 
   <section class="architecture">
     <div class="eyebrow">One application target · two deliberate routes</div>
@@ -41,8 +41,8 @@
     <div class="section-label">Build in this order</div>
     <h2>Eight steps from empty account to customer walkthrough.</h2>
     <div class="step-list">
-      <article class="step"><h3>Run local first</h3><p>Run the Node ACK service and static page locally. Confirm the Direct path can return a matching ACK.</p><p><code>npm run smoke</code></p></article>
-      <article class="step"><h3>Deploy US origin</h3><p>Create a US VPC and CVM. Put Node on loopback; let Nginx provide HTTPS/WSS. Publish browser assets only.</p></article>
+      <article class="step"><h3>Choose the lab design</h3><p>Confirm non-overlapping VPC ranges, two hostnames, budget ownership, and a cleanup owner before you create cloud resources.</p></article>
+      <article class="step"><h3>Optional local check</h3><p>Technical owners can run the sample locally to confirm a Direct ACK before cloud resources are created.</p><p><code>npm run smoke</code></p></article>
       <article class="step"><h3>Prove Direct</h3><p>Set <code>directWs</code> to the US WSS hostname. Run ten sequential commands and preserve both success and failure counts.</p></article>
       <article class="step"><h3>Build Guangzhou ingress</h3><p>Create a non-overlapping Guangzhou VPC, CVM, EIP, separate DNS name, and TLS certificate. This host is a WSS door, not a second website.</p></article>
       <article class="step"><h3>Configure CCN</h3><p>Create CCN, associate both VPCs, check routes, then complete the applicable compliance and bandwidth steps before enabling cross-border use.</p></article>
@@ -59,6 +59,6 @@
 
   <section class="talk"><div class="section-label">60-second customer talk track</div><p><strong>1. The challenge:</strong> A China Mainland browser normally reaches a US service through a public path.</p><p><strong>2. The design:</strong> Our routed path enters through Guangzhou, crosses the private CCN-connected segment, and reaches the same US origin.</p><p><strong>3. The control:</strong> The Direct path reaches the same ACK service without that configured ingress and CCN segment.</p><p><strong>4. The evidence:</strong> A result appears only after the matching ACK comes back to the browser.</p><p><strong>5. The boundary:</strong> This is application-level test evidence, not standalone network-performance proof.</p></section>
 
-  <div class="docs"><a href="ccn-basics.md">CCN basics</a><a href="START-HERE.md">Detailed step-by-step guide</a><a href="verification-checklist.md">Configuration & verification checklist</a><a href="architecture.md">Architecture & measurement boundary</a><a href="test-methodology.md">Fair test methodology</a><a href="deployment-guide.md">Deployment guide</a></div>
+  <div class="docs"><a href="START-HERE.md">Start the full workshop</a><a href="REFERENCE.md">Technical reference</a><a href="cost-and-safety.md">Cost & safety</a><a href="cleanup.md">Cleanup</a></div>
   <footer class="footer">Use current Tencent Cloud console and official documentation for account eligibility, cross-border compliance, region availability, commercial terms, and bandwidth configuration.</footer>
 </div>

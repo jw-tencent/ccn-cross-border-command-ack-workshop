@@ -1,89 +1,113 @@
-# Start Here: Build your first CCN cross-border demo
+# Start here: your first CCN cross-border workshop
 
-This guide is for a **new Tencent Cloud customer** who has a service in the United States and wants to demonstrate a controlled China Mainland ingress → CCN → US private-origin path.
+This is the **main workshop guide**. Follow it from top to bottom. You do **not** need to understand the code or start with the local command line.
 
-It assumes this use case:
+## 1. Workshop goal
 
-```text
-China Mainland browser user -> Guangzhou ingress -> CCN Cross-Border Bandwidth -> US application origin
-```
-
-It is **not** a guide for accelerating users outside China Mainland into a China Mainland website, and it does not claim that CCN is a browser-side setting.
-
-> **Plain-language model:** CCN is the private highway between your cloud networks. A browser cannot drive onto that highway by itself. You must give the browser a public on-ramp (the Guangzhou ingress EIP/CVM), then proxy it onto the CCN private route to the US origin.
-
-Before you build, read [CCN basics for first-time Tencent Cloud customers](ccn-basics.md). It explains when this pattern fits, the resources each part of the architecture needs, and the small set of CCN concepts you should understand first.
-
-## Step 0 — Confirm that this is the right CCN scenario
-
-Use this demo when the customer story is: **China Mainland browser users need a controlled ingress path to the same US-hosted application origin**, or when you need a small functional lab to learn multi-region VPC connectivity.
-
-Do not use it as a generic CDN demo, a one-CVM website tutorial, or a promise that CCN automatically improves every browser measurement. The target of this demo is **functional architecture and validation discipline**:
+Build and validate this small, controlled application path:
 
 ```text
-public ingress -> private CCN-connected segment -> same application origin
+China Mainland browser
+  -> Guangzhou public ingress
+  -> Guangzhou <-> Silicon Valley CCN private segment
+  -> Silicon Valley private application origin
+  -> matching ACK returns to the browser
 ```
 
-If that is the intended topology, continue to the resource checklist below.
+You will compare it with a control path:
+
+```text
+Browser -> Public Internet -> same Silicon Valley ACK service
+```
+
+The goal is to learn **how CCN fits into a real application topology** and to verify that the configured routed application path works. It is not a latency benchmark, price quote, SLA test, or promise that every user will see a performance improvement.
+
+## 2. Who this workshop is for
+
+Use this guide if you are:
+
+- new to Tencent Cloud networking, VPCs, or CCN;
+- evaluating a multi-region, multi-VPC, or China Mainland–related application design;
+- an application, network, security, or solution team that needs a small PoC before production planning; or
+- preparing a customer walkthrough that shows a public ingress and a private cross-region application path.
+
+Do **not** use this as a generic website-acceleration tutorial. CCN is the private connectivity layer between cloud networks; it is not a browser plug-in, CDN, DNS replacement, or a switch a browser can turn on.
+
+### One simple mental model
+
+- **Public front door:** the Guangzhou EIP + CVM lets the browser arrive.
+- **Private highway:** CCN connects the Guangzhou and Silicon Valley cloud networks.
+- **Destination building:** the Silicon Valley private application origin answers the request.
+
+A browser reaches the public front door first. It does not connect to CCN directly.
+
+## 3. Before you create anything
+
+### Required decisions
+
+Confirm these items with the people who own the application, network, security, and budget:
+
+| You need | Why it matters |
+|---|---|
+| Tencent Cloud account with permission to create VPCs, CVMs, EIPs, and CCN resources | The workshop creates cloud resources and may incur charges. |
+| A US-region application location | This guide uses Silicon Valley as the reference private origin. |
+| A Guangzhou ingress location | This guide uses Guangzhou as the China Mainland public entry point. |
+| Two non-overlapping VPC address ranges | Private routing cannot be unambiguous when the same IP range exists at both ends. |
+| A public DNS name and TLS certificate for each endpoint | Browsers need separate secure Direct and routed WSS endpoints. |
+| Approval to run a cross-border PoC | Eligibility, compliance, billing, and available bandwidth are account- and region-dependent. |
+| A China Mainland test client for final comparison | A US test client can check setup but cannot represent China Mainland user experience. |
+
+### Read this first: cost and safety
+
+Before creating a CVM or EIP, read [cost-and-safety.md](cost-and-safety.md). It lists possible billable resources, minimum security controls, and stop conditions.
+
+### Tiny glossary
+
+| Term | Meaning in this workshop |
+|---|---|
+| **VPC** | A private Tencent Cloud network in one region. |
+| **CVM** | A virtual machine that runs Nginx or the ACK service. |
+| **EIP** | A public IP address used by browsers to reach an ingress. |
+| **CCN** | The private network connection between associated VPCs. |
+| **Nginx** | The public web gateway that receives HTTPS/WSS and forwards it. |
+| **ACK** | A small acknowledgement message showing that the application received a command and replied. |
+
+Need more detail? See [REFERENCE.md](REFERENCE.md) while you are on a specific step. You do not need to read it first.
 
 ---
 
-## The architecture in one minute
+## 4. Workshop steps
 
-There are two routes that deliberately reach the **same US ACK service**:
+Complete the steps in this order. Do not enable the routed browser endpoint before Step 6.
 
-```mermaid
-flowchart LR
-  Browser[China Mainland browser]
-  Internet[Public Internet]
-  GZ[Guangzhou public ingress\nEIP + CVM + Nginx]
-  CCN[CCN Cross-Border\nBandwidth]
-  USPrivate[US private origin]
-  ACK[Same US ACK service]
+### Step 1 — Choose your safe lab design
 
-  Browser -->|A. Direct baseline| Internet --> ACK
-  Browser -->|B. Routed path| GZ --> CCN --> USPrivate --> ACK
-```
+**Do**
 
-```text
-A. Direct control path
-Browser -> Public Internet -> US ACK service
+1. Pick two non-overlapping VPC CIDRs. Example: Guangzhou `10.10.0.0/16`; Silicon Valley `10.20.0.0/16`.
+2. Decide two DNS names:
+   - Direct endpoint: `demo.example.com`
+   - Routed endpoint: `ccn-path.example.com`
+3. Assign an owner and expiry date to each workshop resource.
+4. Decide whether you will use a real China Mainland client for the final test.
 
-B. Routed CCN path
-Browser -> Guangzhou public ingress -> CCN -> US private ACK service
-```
+**Expected result**
 
-Why two paths? The Direct route is your control. The routed route tests whether your configured topology works. Keeping the US ACK service the same avoids accidentally comparing two different applications.
+You have a written topology, two distinct hostnames, non-overlapping CIDRs, and an agreed cleanup owner.
 
-The demo records a browser **Command-to-ACK application RTT** after a matching acknowledgement returns. It proves an application exchange happened. It is not a CCN-link latency measurement, one-way latency, SLA, or performance guarantee.
+**If you are blocked**
+
+- Do not reuse VPC ranges without checking for overlap.
+- Do not use a production VPC or a shared production security group for a first workshop.
+- Do not continue until budget and cross-border approval ownership are clear.
 
 ---
 
-## What you need before you start
+### Step 2 — Run the application locally (optional but recommended)
 
-| Item | Why you need it | Where it belongs |
-|---|---|---|
-| Tencent Cloud account | Owns resources and approval workflow | Your Tencent Cloud organization |
-| US VPC + CVM | Hosts the static demo and Node ACK service | A US Tencent Cloud region |
-| China Mainland VPC + CVM + EIP | Public browser on-ramp for the routed path | Guangzhou in this reference architecture |
-| CCN instance | Connects the two VPCs through private routing | CCN console |
-| Cross-border compliance and bandwidth approval | Enables the applicable cross-border CCN service | CCN console / approved commercial workflow |
-| Two DNS names + TLS certificates | Separates Direct and routed WSS endpoints | Your DNS zone and certificates |
-| A China Mainland test client | Makes a customer-relevant comparison possible | Real user network is best |
+This step checks the sample application before cloud resources are created. Skip it only if a technical owner has already validated the repository.
 
-### Three non-negotiable design rules
-
-1. **Use non-overlapping VPC CIDRs.** Example: China Mainland `10.10.0.0/16`; US `10.20.0.0/16`.
-2. **Use a separate public hostname for the routed ingress.** The browser should connect to the Guangzhou endpoint only when it selects the routed path.
-3. **Keep the Node ACK service private on loopback.** Nginx terminates public TLS/WSS and proxies to it.
-
----
-
-## Build order: do it in this sequence
-
-### Step 1 — Run the demo locally first
-
-Before spending on cloud resources, verify the app and the ACK protocol locally:
+**Do**
 
 ```bash
 npm run smoke
@@ -94,28 +118,39 @@ ALLOWED_ORIGINS=http://127.0.0.1:8080 \
 npm start
 ```
 
-In another terminal:
+In a second terminal:
 
 ```bash
 python3 -m http.server 8080 -d app
 ```
 
-Open `http://127.0.0.1:8080?ws=ws://127.0.0.1:8787/ws`.
+Open:
 
-**Expected result:** the Direct path shows a connected state and a real ACK sample after a command. The CCN path stays unavailable because no routed endpoint exists yet.
+```text
+http://127.0.0.1:8080?ws=ws://127.0.0.1:8787/ws
+```
+
+**Expected result**
+
+- Tests pass.
+- The Direct path connects and a command produces one matching ACK.
+- The routed path remains unavailable because you have not built it yet.
+
+**If you are blocked**
+
+Check that Node.js 22+ and Python 3 are installed, and that the first terminal still has the Node service running. The local query parameter works only for Direct debugging; it cannot activate the routed path.
 
 ---
 
-### Step 2 — Build the US origin and prove the Direct baseline
+### Step 3 — Build and test the US Direct endpoint
 
-In a US Tencent Cloud region:
+**Do**
 
-1. Create a VPC and a CVM.
-2. Install Node.js 22 and Nginx.
-3. Run `server/server.js` on `127.0.0.1:8787`.
-4. Put only `app/index.html`, `app/app.js`, `app/styles.css`, and a deployment-time `app/demo-config.js` into a dedicated Nginx web root.
-5. Add a public EIP, a DNS record such as `demo.example.com`, and a TLS certificate.
-6. Start with this configuration:
+1. Create a US VPC and CVM.
+2. Run the included Node ACK service on `127.0.0.1:8787`.
+3. Install Nginx and publish only the browser files from `app/` in a dedicated web root.
+4. Add an EIP, the Direct DNS name, and TLS certificate.
+5. Set only `directWs` in the deployment-time `app/demo-config.js`:
 
 ```js
 window.CCN_DEMO_CONFIG = Object.freeze({
@@ -125,87 +160,76 @@ window.CCN_DEMO_CONFIG = Object.freeze({
 });
 ```
 
-7. Load the page from the public Direct hostname and send ten sequential commands.
+6. From the browser, send ten sequential Direct commands.
 
-**Expected result:** the Direct path records ten matching ACKs. Do not call that number CCN performance; this is only the control path and application-level measurement.
+**Expected result**
 
-Use [`../infra/nginx/us-demo.conf.example`](../infra/nginx/us-demo.conf.example) as a starting point. Do not make your entire project directory the Nginx document root; publish browser assets only.
+- `https://demo.example.com` loads.
+- The UI shows `DIRECT BASELINE CONNECTED`.
+- Ten commands produce ten matching ACKs.
 
----
+**If you are blocked**
 
-### Step 3 — Build the China Mainland ingress
-
-In Guangzhou for this reference architecture:
-
-1. Create a VPC and subnet that do not overlap with the US VPC.
-2. Create an ingress CVM and associate an EIP.
-3. Permit only the required public ports, normally HTTPS/WSS on `443`, plus restricted administration access.
-4. Create a **separate** routed hostname, for example `ccn-path.example.com`, pointing at the Guangzhou EIP.
-5. Obtain a TLS certificate for that hostname.
-
-At this point, the Guangzhou CVM is a front door for `/healthz` and `/ws`. It does **not** host the browser website. Returning `404` for `/` is intentional.
+Check the Node health endpoint, Nginx configuration, DNS/TLS, firewall/security-group rules, and `ALLOWED_ORIGINS`. Do not call the displayed ACK number a CCN result; this is the public-Internet control path.
 
 ---
 
-### Step 4 — Create CCN and complete cross-border prerequisites
+### Step 4 — Build the Guangzhou public ingress
 
-In the CCN console:
+**Do**
+
+1. Create the Guangzhou VPC, subnet, CVM, and EIP using the CIDR you selected.
+2. Allow only required public HTTPS/WSS traffic and restricted administration access.
+3. Point `ccn-path.example.com` at the Guangzhou EIP and provision a TLS certificate.
+4. Configure the ingress so it will expose only `/healthz` and `/ws` after the private route is ready.
+
+**Expected result**
+
+The Guangzhou CVM is ready to be the **public front door** for the routed path. It does not need to host the browser page.
+
+**If you are blocked**
+
+A `404` at `https://ccn-path.example.com/` is expected in this design. The host is a narrow proxy, not a second copy of the website.
+
+---
+
+### Step 5 — Create CCN and prove the private path
+
+**Do**
 
 1. Create a CCN instance.
-2. Associate the Guangzhou VPC and the US VPC.
-3. Check that routes for the opposite VPC CIDR are learned/selected and there is no overlap or conflict.
-4. In **Bandwidth Management**, complete the applicable `CCN Cross-Border Sales Compliance Check` when prompted.
-5. After approval and according to the applicable commercial flow, configure the cross-border bandwidth for the Guangzhou ↔ US region pair.
-6. Record the approval, bandwidth configuration, and route status in your project evidence.
-
-Tencent Cloud's CCN bandwidth documentation states that creating and associating network instances plus configuring bandwidth are prerequisites for normal communication. Cross-border availability, eligibility, billing, bandwidth limits, approval timing, and supported region pairs are account- and product-condition dependent. Check the current console and official documentation before ordering:
-
-- [CCN bandwidth configuration (Tencent Cloud)](https://www.tencentcloud.com/document/product/1003/38894)
-- [CCN documentation index (Tencent Cloud International)](https://intl.cloud.tencent.com/document/product/1003/47565)
-
-**Do not treat Terraform as a substitute for this approval.** Infrastructure-as-code can describe VPCs, CVMs, security groups, and inputs; it does not itself obtain cross-border compliance or commercial approval.
-
----
-
-### Step 5 — Prove private reachability before exposing the routed endpoint
-
-From the Guangzhou ingress CVM, verify that it can reach the **US private IP** of the origin over the expected protocol. For HTTPS health checks, preserve the hostname/SNI expected by the US certificate:
+2. Associate the Guangzhou and US VPCs.
+3. Check the CCN route table and VPC routes. Each VPC must have a valid route to the other VPC's CIDR, with no overlap or conflict.
+4. Complete the applicable cross-border compliance and bandwidth workflow in the Tencent Cloud console.
+5. From the Guangzhou CVM, verify HTTPS reachability to the **US private IP** of the origin while preserving the TLS hostname:
 
 ```bash
 curl --resolve demo.example.com:443:US_PRIVATE_IP \
   https://demo.example.com/healthz
 ```
 
-Only proceed when this returns the expected health JSON. If this step fails, troubleshoot VPC CIDRs, CCN association, route tables, security groups, upstream listener, and TLS/SNI before testing from a browser.
+**Expected result**
+
+The private health check returns the expected JSON response from the US ACK origin.
+
+**If you are blocked**
+
+Stop browser testing and check, in order: VPC CIDRs, CCN association, selected routes, security groups, US service listener, and TLS/SNI configuration.
+
+**Important**
+
+Tencent Cloud's documented CCN sequence is **create CCN -> associate network instances -> check route table -> configure bandwidth**. [Official CCN guide](https://www.tencentcloud.com/document/product/1003/31985). Cross-border eligibility, approval, billing, bandwidth, and available region pairs must be checked in the current console and commercial process; this repository cannot grant them.
 
 ---
 
-### Step 6 — Configure the Guangzhou Nginx reverse proxy
+### Step 6 — Configure the routed WebSocket proxy
 
-Configure Nginx at the Guangzhou ingress to:
+**Do**
 
-```text
-Public WSS /ws
-  -> Guangzhou Nginx
-  -> CCN private route
-  -> US private origin HTTPS /ws
-  -> Node ACK service
-```
-
-Use [`../infra/nginx/guangzhou-ingress.conf.example`](../infra/nginx/guangzhou-ingress.conf.example) as a starting point.
-
-Important safety controls:
-
-- Expose `/healthz` and `/ws` only.
-- Retain `proxy_ssl_verify on` and `proxy_ssl_name` for the US origin.
-- Do not disable upstream certificate verification just to make a TLS error disappear.
-- Keep the routed hostname separate from the static page hostname.
-
----
-
-### Step 7 — Enable the routed endpoint in the static demo
-
-After Steps 1–6 are verified, create the deployment-time configuration:
+1. Configure Nginx on Guangzhou to forward `/healthz` and `/ws` to the US private origin.
+2. Retain upstream TLS certificate and hostname verification.
+3. Verify the Guangzhou public health endpoint.
+4. Only now set `ccnPathWs` in the deployment-time configuration:
 
 ```js
 window.CCN_DEMO_CONFIG = Object.freeze({
@@ -215,55 +239,81 @@ window.CCN_DEMO_CONFIG = Object.freeze({
 });
 ```
 
-The repo version intentionally uses blank endpoint values. Do not commit your live hostname, tokens, IPs, or account identifiers.
+**Expected result**
 
-**Expected result:** selecting CCN Cross-Border Bandwidth changes the status to `CCN ROUTED TEST CONNECTED`. A command then records a `REAL ROUTED ACK RTT` only after a matching ACK is received.
+- `https://ccn-path.example.com/healthz` returns the expected health response.
+- The UI shows `CCN ROUTED TEST CONNECTED` when the routed mode is selected.
+- A routed command produces `REAL ROUTED ACK RTT` only after a matching ACK returns.
 
----
+**If you are blocked**
 
-### Step 8 — Run a fair customer test
-
-For every comparison, use the same:
-
-- China Mainland client and access network;
-- browser and browser version;
-- command payload and command count;
-- US application origin and backend version; and
-- time window.
-
-Run Direct first, then the routed path. Preserve both successes and failures. A US client can validate configuration and functional continuity, but it cannot represent China Mainland user experience.
-
-See [`test-methodology.md`](test-methodology.md) for the reporting format and [`verification-checklist.md`](verification-checklist.md) for the complete go/no-go validation sequence.
+- `502` generally points to the private path or upstream TLS/SNI configuration.
+- A browser WSS error after a successful private health check generally points to public DNS/TLS, Nginx Upgrade headers, security group, or the public ingress path.
+- Never disable `proxy_ssl_verify` only to hide a certificate problem.
 
 ---
 
-## Customer demo talk track
+### Step 7 — Run the customer-relevant test and record the outcome
 
-Use this short sequence:
+**Do**
 
-1. **Problem:** “A China Mainland user reaching a US service normally enters through the public Internet.”
-2. **Design:** “For the configured path, the browser enters our Guangzhou ingress, then the traffic uses a private CCN-connected segment to the same US origin.”
-3. **Control:** “Both paths end at the same acknowledgement service, so the application target stays constant.”
-4. **Proof:** “Each displayed sample is real only after the browser receives the matching ACK.”
-5. **Boundary:** “This validates configured application continuity. It is not a standalone claim about CCN-link latency, SLA, or guaranteed improvement.”
+1. Use the same China Mainland client/network, browser version, command payload/count, US backend version, and time window for both paths.
+2. Run Direct first, then routed.
+3. Keep both success and failure counts.
+4. Record the client location/network, endpoint condition, time, command count, and raw application ACK results.
 
----
+**Expected result**
 
-## Troubleshooting: where to look first
+You have a reproducible functional test record that shows whether each endpoint completed matching application ACKs.
 
-| Symptom | First check |
-|---|---|
-| Direct path unavailable | US Nginx, Node service health, DNS/TLS, `ALLOWED_ORIGINS` |
-| Routed path unavailable | Routed DNS/TLS, Guangzhou Nginx error log, public EIP/security group |
-| Guangzhou returns `502` | Private origin reachability, CCN routes, upstream TLS/SNI verification |
-| `/healthz` works from Guangzhou but browser WSS fails | Public ingress certificate/SNI, Nginx WebSocket headers, browser console, EIP/network path |
-| Routed page root returns `404` | Expected if Guangzhou only exposes `/healthz` and `/ws` |
-| The browser shows an RTT after failure | Treat as a defect; failed, malformed, unmatched, or timed-out commands must create no successful sample |
+**How to explain the result**
+
+> “This proves that the configured application path returned matching ACKs. It is not a standalone claim about CCN-link latency, SLA, bandwidth, or a guaranteed user-experience improvement.”
 
 ---
 
-## Terraform: when to add it
+### Step 8 — Close the workshop safely
 
-Use Terraform only after you can reproduce the topology manually once. Start with VPCs, subnets, CVMs, EIPs, and security groups. Keep CCN cross-border compliance and bandwidth approval as explicit human-controlled gates.
+**Do**
 
-The repo's [`../infra/terraform/`](../infra/terraform/) folder is a safe reference scaffold, not a promise of one-click cross-border provisioning.
+1. Decide whether to retain the lab for an approved next test.
+2. If not, blank `ccnPathWs` in the deployed configuration first.
+3. Remove public exposure, then release EIPs, CVMs, disks/snapshots, CCN bandwidth configuration, associations, and VPCs after checking dependencies.
+4. Review the billing/resource console.
+
+**Expected result**
+
+The customer-facing page no longer points to deleted infrastructure and no unintended workshop resources remain.
+
+Follow the full [cleanup procedure](cleanup.md). Do not assume deleting a CVM automatically releases every related billable resource.
+
+---
+
+## 5. Common questions
+
+### “Why does the workshop have Direct and routed paths?”
+
+Direct is the control path over the public Internet. Routed enters through Guangzhou, then uses the CCN-connected private segment. Both reach the same ACK service so the application target stays the same.
+
+### “Can the browser connect to CCN directly?”
+
+No. The browser connects to a public HTTPS/WSS hostname. The Guangzhou ingress then sends traffic over the private CCN-connected path.
+
+### “Does a lower ACK number prove CCN is faster?”
+
+No. The number is application-level Command-to-ACK RTT. A valid comparison needs matched client, network, browser, payload, backend, and time conditions. It is never by itself an SLA or performance guarantee.
+
+### “Why is the Guangzhou root URL returning 404?”
+
+That is intentional. Guangzhou is a narrow ingress proxy for `/healthz` and `/ws`, not a public website host.
+
+### “Can Terraform make this one-click?”
+
+Not safely for the entire cross-border process. Terraform can describe some foundation resources, but it does not replace account-specific compliance, bandwidth, commercial approval, DNS, TLS, security review, or production ownership. See [`../infra/terraform/README.md`](../infra/terraform/README.md).
+
+## 6. When you need more detail
+
+- Technical architecture, Nginx, exact verification checks, fair-test rules, and developer protocol: [REFERENCE.md](REFERENCE.md)
+- Cost, security, and stop conditions: [cost-and-safety.md](cost-and-safety.md)
+- Cleanup: [cleanup.md](cleanup.md)
+- Public GitHub maintainer release checklist: [release-checklist.md](release-checklist.md)

@@ -59,18 +59,22 @@ test('customer-facing statuses distinguish Direct, routed CCN, unavailable, and 
   assert.match(appSource, /not CCN-link latency or an SLA/);
 });
 
-test('new customers have a visual and a detailed safe onboarding guide', () => {
+test('new customers have one clear workshop path before technical quick-start material', () => {
   const readme = fs.readFileSync(README_PATH, 'utf8');
   const startHere = fs.readFileSync(START_HERE_MD_PATH, 'utf8');
   const visualGuide = fs.readFileSync(START_HERE_HTML_PATH, 'utf8');
 
-  assert.match(readme, /docs\/START-HERE\.html/);
+  assert.match(readme, /## Start the workshop here/);
+  assert.match(readme, /Do not begin with Local Quick Start/);
   assert.match(readme, /docs\/START-HERE\.md/);
-  assert.match(startHere, /CCN is the private highway between your cloud networks/);
-  assert.match(startHere, /Browser -> Guangzhou public ingress -> CCN -> US private ACK service/);
-  assert.match(startHere, /CCN Cross-Border Sales Compliance Check/);
-  assert.match(startHere, /China Mainland client and access network/);
-  assert.match(startHere, /not a CCN-link latency measurement/);
+  assert.match(readme, /docs\/REFERENCE\.md/);
+  assert.match(startHere, /## 1\. Workshop goal/);
+  assert.match(startHere, /## 2\. Who this workshop is for/);
+  assert.match(startHere, /## 3\. Before you create anything/);
+  assert.match(startHere, /### Step 1 — Choose your safe lab design/);
+  assert.match(startHere, /### Step 8 — Close the workshop safely/);
+  assert.match(startHere, /China Mainland test client/);
+  assert.match(startHere, /not a latency benchmark, price quote, SLA test/);
   assert.match(visualGuide, /Build the on-ramp/);
-  assert.match(visualGuide, /Eight steps from empty account to customer walkthrough/);
+  assert.match(visualGuide, /Start the full workshop/);
 });

@@ -2,7 +2,7 @@
 
 This directory deliberately provides **variables and configuration shape**, not a copy of a live cloud environment.
 
-Start with the manual learning path in [`../../docs/ccn-basics.md`](../../docs/ccn-basics.md) and [`../../docs/START-HERE.md`](../../docs/START-HERE.md). Terraform belongs after you understand the resource roles and can validate the topology manually once.
+Start with the beginner-first [`../../docs/START-HERE.md`](../../docs/START-HERE.md) workshop. Terraform belongs only after you understand the resource roles and can validate the topology manually once. Use [`../../docs/REFERENCE.md`](../../docs/REFERENCE.md) when you need implementation detail.
 
 ## Why this is not one-click CCN provisioning
 

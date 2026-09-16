@@ -115,17 +115,17 @@ Bring the completed verification checklist and architecture notes to your Tencen
 
 ---
 
-## New to CCN? Follow this learning path
+## Start the workshop here
 
-| Read this | You will learn | Use it when |
-|---|---|---|
-| **[CCN basics in plain language](docs/ccn-basics.md)** | What CCN does, when it fits, the resources involved, and the console flow | You are new to VPC, CCN, private routing, or cross-border architecture |
-| **[Visual field guide](docs/START-HERE.html)** | Architecture and the eight-step journey at a glance | You want a quick visual explanation before using the console |
-| **[Step-by-step build guide](docs/START-HERE.md)** | Prerequisites, resource preparation, configuration, expected results, and initial troubleshooting | You are ready to configure the workshop |
-| **[Verification checklist](docs/verification-checklist.md)** | The go/no-go checks before enabling `ccnPathWs` or presenting results | You have created cloud resources |
-| **[Cost and safety guardrails](docs/cost-and-safety.md)** | Billable-resource, security, measurement, and stop-condition boundaries | Before provisioning any cloud resource |
-| **[Cleanup procedure](docs/cleanup.md)** | How to disable endpoints and release workshop resources | Before ending the lab or handing it off |
-| **[Public release checklist](docs/release-checklist.md)** | What to verify before publishing or updating this repository | Immediately before every public push |
+**Do not begin with Local Quick Start unless you are the technical owner.** New customers should follow one complete, beginner-first guide:
+
+1. Read [Cost and safety guardrails](docs/cost-and-safety.md) before creating billable resources.
+2. Follow [Start here: your first CCN cross-border workshop](docs/START-HERE.md) from Step 1 through Step 8. It explains the goal, audience, prerequisites, build sequence, expected result, and common questions in plain language.
+3. Open the [visual field guide](docs/START-HERE.html) only if a diagram helps before you start.
+4. Use [technical reference](docs/REFERENCE.md) only when a workshop step needs deployment, verification, or measurement detail.
+5. Follow [cleanup procedure](docs/cleanup.md) when the lab ends.
+
+Maintainers can use [release checklist](docs/release-checklist.md) before public GitHub changes.
 
 ---
 
@@ -163,7 +163,7 @@ Read [cleanup.md](docs/cleanup.md) **before** provisioning cloud resources. Term
 
 ---
 
-## Local quick start
+## Local quick start (technical owner only)
 
 Requirements: Node.js 22+ and Python 3. No npm packages are required.
 
@@ -202,7 +202,7 @@ The query parameter is supported only for the Direct local-debug path. It cannot
 4. Enable `ccnPathWs` only after verifying the separate Guangzhou ingress, CCN route, Silicon Valley private-origin reachability, TLS/WSS, applicable compliance status, and rollback path.
 5. Never place credentials or tokens in browser configuration or WebSocket URLs.
 
-See [`docs/architecture.md`](docs/architecture.md) for evidence boundaries and [`docs/test-methodology.md`](docs/test-methodology.md) for fair comparison conditions.
+See [`docs/REFERENCE.md`](docs/REFERENCE.md) for evidence boundaries, deployment detail, and fair comparison conditions.
 
 ---
 
