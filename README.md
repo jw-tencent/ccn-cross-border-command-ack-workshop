@@ -2,6 +2,16 @@
 
 A customer-facing workshop for understanding **Tencent Cloud Cloud Connect Network (CCN)** through a small, observable application path.
 
+## New to CCN? Start the workshop
+
+**[Open the beginner workshop guide ->](docs/START-HERE.md)**
+
+It is the one guide to follow from beginning to end. It explains the goal, who this is for, what you need, each build step, expected results, common problems, and cleanup. **You do not need to understand the code or run Local Quick Start first.**
+
+- **Want a 2-minute picture first?** Open the [visual field guide](docs/START-HERE.html).
+- **Ready to create cloud resources?** Read [cost and safety](docs/cost-and-safety.md), then return to the beginner workshop guide.
+- **Blocked on a technical step?** Open [technical reference](docs/REFERENCE.md) only for that step.
+
 > **Business question this workshop helps answer:** Can we connect a controlled China Mainland public ingress to the same application origin in another Tencent Cloud region through a reviewed CCN private network path, validate application continuity, and identify what must be completed before production design or commercial evaluation?
 
 ```text

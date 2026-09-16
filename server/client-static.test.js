@@ -64,10 +64,12 @@ test('new customers have one clear workshop path before technical quick-start ma
   const startHere = fs.readFileSync(START_HERE_MD_PATH, 'utf8');
   const visualGuide = fs.readFileSync(START_HERE_HTML_PATH, 'utf8');
 
-  assert.match(readme, /## Start the workshop here/);
-  assert.match(readme, /Do not begin with Local Quick Start/);
+  assert.match(readme, /## New to CCN\? Start the workshop/);
+  assert.match(readme, /Open the beginner workshop guide/);
+  assert.match(readme, /You do not need to understand the code or run Local Quick Start first/);
   assert.match(readme, /docs\/START-HERE\.md/);
   assert.match(readme, /docs\/REFERENCE\.md/);
+  assert.ok(readme.indexOf('Open the beginner workshop guide') < readme.indexOf('## Why customers consider CCN'));
   assert.match(startHere, /## 1\. Workshop goal/);
   assert.match(startHere, /## 2\. Who this workshop is for/);
   assert.match(startHere, /## 3\. Before you create anything/);
