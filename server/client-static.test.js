@@ -25,10 +25,11 @@ test('CCN routed telemetry requires deployment configuration, not query data or 
   assert.doesNotMatch(appSource, /solution1_validated/);
   assert.doesNotMatch(appSource, /QUERY\.get\('ccnPathWs'\)/);
   assert.match(appSource, /accelerated: configuredCcnPathWs/);
-  assert.match(appSource, /accelerated: new WebSocketAckClient\('accelerated', endpoints\.accelerated\)/);
+  assert.match(appSource, /accelerated: new WebSocketAckClient\(endpoints\.accelerated\)/);
   assert.match(appSource, /histories\[activeMode\]\.real\.push\(/);
   assert.match(appSource, new RegExp(REQUIRED_UNAVAILABLE_MESSAGE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(indexSource, /\?solution1Ws=/);
+  assert.doesNotMatch(indexSource, /data-page-node-id=/);
 });
 
 test('public defaults include no live endpoints and configuration loads before app logic', () => {

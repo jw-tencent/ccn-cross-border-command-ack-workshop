@@ -3,7 +3,7 @@
 
   /** @typedef {'direct'|'accelerated'} PathMode */
   /** @typedef {'simulated'|'real'} TelemetrySource */
-  /** @typedef {{commandId: string, ackId: string, completedAt: number, source: TelemetrySource, rttMs?: number, outcome?: string, routeId?: string, routeStatus?: string}} CommandSample */
+  /** @typedef {{commandId: string, ackId: string, rttMs?: number, outcome?: string, routeId?: string, routeStatus?: string}} CommandSample */
 
   const MAX_COMMANDS = 10;
   const TRACE_STEP_DURATION_MS = 420;
@@ -106,18 +106,16 @@
   }
 
   class WebSocketAckClient {
-    /** @param {PathMode} mode @param {string} endpoint */
-    constructor(mode, endpoint) {
-      this.mode = mode;
+    /** @param {string} endpoint */
+    constructor(endpoint) {
+      const hasValidEndpoint = isSafeWebSocketEndpoint(endpoint);
       this.endpoint = endpoint;
       this.socket = null;
-      this.status = isSafeWebSocketEndpoint(endpoint) ? 'connecting' : 'not_configured';
-      this.detail = isSafeWebSocketEndpoint(endpoint) ? 'Connecting to the configured endpoint; the endpoint is not displayed.' : 'No endpoint was provided.';
-      this.routeId = '';
-      this.routeStatus = '';
+      this.status = hasValidEndpoint ? 'connecting' : 'not_configured';
+      this.detail = hasValidEndpoint ? 'Connecting to the configured endpoint; the endpoint is not displayed.' : 'No endpoint was provided.';
       /** @type {Map<string, {resolve: (value: object) => void, reject: (reason: Error) => void, timer: number}>} */
       this.pending = new Map();
-      if (isSafeWebSocketEndpoint(endpoint)) this.connect();
+      if (hasValidEndpoint) this.connect();
     }
 
     connect() {
@@ -157,8 +155,6 @@
       let message;
       try { message = JSON.parse(String(event.data)); } catch { return; }
       if (!message || typeof message !== 'object' || typeof message.eventId !== 'string') return;
-      if (typeof message.routeId === 'string') this.routeId = message.routeId;
-      if (typeof message.routeStatus === 'string') this.routeStatus = message.routeStatus;
       const pending = this.pending.get(message.eventId);
       if (!pending) { render(); return; }
       window.clearTimeout(pending.timer);
@@ -197,8 +193,8 @@
   }
 
   const clients = {
-    direct: new WebSocketAckClient('direct', endpoints.direct),
-    accelerated: new WebSocketAckClient('accelerated', endpoints.accelerated),
+    direct: new WebSocketAckClient(endpoints.direct),
+    accelerated: new WebSocketAckClient(endpoints.accelerated),
   };
 
   /** @returns {WebSocketAckClient} */
@@ -207,11 +203,6 @@
   /** @returns {TelemetrySource} */
   function selectedSource() {
     return activeClient().status === 'connected' ? 'real' : 'simulated';
-  }
-
-  /** @returns {boolean} */
-  function shouldUseRealEndpointForCommand() {
-    return activeClient().status === 'connected';
   }
 
   /** @returns {CommandSample[]} */
@@ -409,7 +400,7 @@
     const startedAt = performance.now();
     const response = await client.send({ type: 'game_command', eventId, command: 'fire', clientSentMonoMs: startedAt, schemaVersion: 1 });
     const rttMs = performance.now() - startedAt;
-    histories[activeMode].real.push({ commandId, ackId: eventId, completedAt: Date.now(), source: 'real', rttMs, outcome: response.outcome, routeId: response.routeId, routeStatus: response.routeStatus });
+    histories[activeMode].real.push({ commandId, ackId: eventId, rttMs, outcome: response.outcome, routeId: response.routeId, routeStatus: response.routeStatus });
     elements.liveAck.textContent = `ACK confirmed / ${rttMs.toFixed(2)} ms`;
     elements.liveFlow.textContent = activeMode === 'accelerated' ? 'Real routed application ACK confirmed' : 'Real Direct application ACK confirmed';
     setTraceStatus('Matching server ACK received: recorded as a real Command-to-ACK round-trip application acknowledgement, not network latency or an SLA.');
@@ -421,7 +412,7 @@
   async function sendOneCommand() {
     if (commandState === 'pending' || remainingCommands() === 0) return false;
     commandState = 'pending';
-    const sourceAtStart = shouldUseRealEndpointForCommand() ? 'real' : 'simulated';
+    const sourceAtStart = selectedSource();
     const commandNumber = activeHistory().length + 1;
     const commandId = `CMD-${String(commandNumber).padStart(2, '0')}`;
     elements.ackOverlay.hidden = false; elements.ackOverlay.setAttribute('aria-hidden', 'false');
@@ -436,7 +427,7 @@
       else {
         await runSimulatedTrace();
         const ackId = `SIM-ACK-${String(commandNumber).padStart(2, '0')}`;
-        histories[activeMode].simulated.push({ commandId, ackId, completedAt: Date.now(), source: 'simulated' });
+        histories[activeMode].simulated.push({ commandId, ackId });
         elements.liveAck.textContent = 'ACK confirmed / simulated'; elements.liveFlow.textContent = 'Simulated path complete';
         setTraceStatus('Simulated ACK returned. This state machine demonstrates architecture; it is not real CCN, CVM, WebSocket, or origin telemetry.');
         announce(`${commandId} received ${ackId}. Only a simulated ACK confirmation is recorded, with no performance timing.`);
