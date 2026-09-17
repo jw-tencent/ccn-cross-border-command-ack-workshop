@@ -76,7 +76,32 @@ Need more detail? See [REFERENCE.md](REFERENCE.md) while you are on a specific s
 
 ---
 
-## 4. Workshop steps
+## 4. How to follow this workshop: Console first, Terraform later
+
+**This is a console-first workshop. Do not run Terraform at the beginning.** Build the small topology manually once so you can see which resource performs each role and diagnose a failure without guessing.
+
+The current `infra/terraform/` directory is a **safe reference scaffold**. It contains versions, variables, and example values only; it does not include an executable `main.tf` that creates the topology. Therefore, it is not a workshop step to run `terraform apply`.
+
+| When | Where you work | What you do | Do not do yet |
+|---|---|---|---|
+| Before any cloud resource | README + Tencent Cloud Console | Choose CIDRs, DNS names, resource owner, expiry date, and budget/compliance owner. | Do not create a CCN, CVM, EIP, or run Terraform. |
+| Build the Direct control path | Tencent Cloud Console + US CVM | Create the **US VPC, subnet, CVM, and EIP**. Deploy Nginx and the ACK service. | Do not create the Guangzhou CVM or set `ccnPathWs`. |
+| Build the routed entry point | Tencent Cloud Console + Guangzhou CVM | Create the **Guangzhou VPC, subnet, CVM, and EIP**. Set up its DNS and TLS. | Do not treat it as a second website or expose the US private origin directly. |
+| Connect the private networks | CCN Console | Create CCN, associate both VPCs, check routes, then complete applicable cross-border approval and bandwidth steps. | Do not enable the routed browser endpoint until private health is successful. |
+| Enable the demo | Guangzhou CVM + deployed static site | Configure Nginx proxying and set `ccnPathWs` in the deployment-time config. | Do not commit live endpoints or credentials. |
+| After a successful manual workshop | Terraform, if you decide to automate a future lab | Use Terraform only for repeatable non-production foundation resources after reviewing the current provider/docs. | Do not expect Terraform to obtain cross-border compliance, purchase bandwidth, configure production DNS/certificates, or replace security review. |
+
+### The exact order to remember
+
+```text
+Plan -> US CVM -> Direct test -> Guangzhou CVM -> CCN and approval -> Private health check -> Routed endpoint -> China Mainland test -> Cleanup
+```
+
+If you are following this for the first time, stay in the Tencent Cloud Console until **Step 7** is complete. Terraform is an optional follow-up for a later, repeatable lab; it is not needed to finish this Workshop.
+
+---
+
+## 5. Workshop steps
 
 Complete the steps in this order. Do not enable the routed browser endpoint before Step 6.
 

@@ -37,6 +37,8 @@ flowchart LR
 
 It is the one guide to follow from beginning to end. It explains the goal, who this is for, what you need, each build step, expected results, common problems, and cleanup. **You do not need to understand the code or run Local Quick Start first.**
 
+> **Build method:** this is a **Tencent Cloud Console-first** workshop. Create the US CVM first, validate the Direct path, then create the Guangzhou CVM, CCN, and routed path. Do **not** run Terraform at the start: the current Terraform folder is a safe reference scaffold, not an executable deployment.
+
 - **Want a 2-minute picture first?** Open the [visual field guide](docs/START-HERE.html).
 - **Ready to create cloud resources?** Read [cost and safety](docs/cost-and-safety.md), then return to the beginner workshop guide.
 - **Blocked on a technical step?** Open [technical reference](docs/REFERENCE.md) only for that step.

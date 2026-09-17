@@ -78,6 +78,8 @@ test('new customers have one clear workshop path before technical quick-start ma
   assert.match(readme, /## New to CCN\? Start the workshop/);
   assert.match(readme, /Open the beginner workshop guide/);
   assert.match(readme, /You do not need to understand the code or run Local Quick Start first/);
+  assert.match(readme, /Tencent Cloud Console-first/);
+  assert.match(readme, /Do \*\*not\*\* run Terraform at the start/);
   assert.match(readme, /docs\/START-HERE\.md/);
   assert.match(readme, /docs\/REFERENCE\.md/);
   assert.ok(readme.indexOf('Open the beginner workshop guide') < readme.indexOf('## Why customers consider CCN'));
