@@ -33,8 +33,8 @@ China Mainland VPC
 2. Add VPC, subnet, CVM, security-group, and EIP resources using variables from `terraform.tfvars`.
 3. Keep actual `terraform.tfvars`, `.terraform/`, and all `terraform.tfstate*` files out of Git.
 4. Complete CCN compliance and cross-border bandwidth steps through the approved account workflow.
-5. Associate VPCs and verify non-overlapping routes and private-origin reachability.
-6. Deploy the reviewed Nginx example configurations and validate WSS endpoints before enabling them in `app/demo-config.js`.
+5. Associate VPCs and verify non-overlapping routes and US VPC endpoint reachability.
+6. Deploy the reviewed Nginx example configurations and validate WSS endpoints before generating them in the ignored `runtime-config.js` in the deployed static web root.
 
 The included `terraform.tfvars.example` is intentionally safe to publish. Copy it to `terraform.tfvars` locally and replace all values for your own account.
 

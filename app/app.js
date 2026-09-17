@@ -8,18 +8,16 @@
   const MAX_COMMANDS = 10;
   const TRACE_STEP_DURATION_MS = 420;
   const ACK_TIMEOUT_MS = 10_000;
-  const QUERY = new URLSearchParams(window.location.search);
   const deploymentConfig = window.CCN_DEMO_CONFIG && typeof window.CCN_DEMO_CONFIG === 'object' ? window.CCN_DEMO_CONFIG : {};
   const configuredDirectWs = typeof deploymentConfig.directWs === 'string' ? deploymentConfig.directWs.trim() : '';
   const configuredCcnPathWs = typeof deploymentConfig.ccnPathWs === 'string' ? deploymentConfig.ccnPathWs.trim() : '';
   const configuredDefaultMode = deploymentConfig.defaultMode === 'accelerated' ? 'accelerated' : 'direct';
-  const routeLock = QUERY.get('route') === 'direct' ? 'direct' : null;
   const endpoints = {
-    /* Direct keeps local-debug query compatibility. The CCN endpoint is deployment-config only. */
-    direct: configuredDirectWs || QUERY.get('directWs') || QUERY.get('ws') || '',
+    // Reviewed runtime configuration is the only source for real endpoints.
+    direct: configuredDirectWs,
     accelerated: configuredCcnPathWs,
   };
-  const CCN_PATH_UNAVAILABLE = 'CCN routed-path telemetry is unavailable until a reviewed Guangzhou ingress, CCN route, US private origin, and distinct WSS endpoint are configured and validated.';
+  const CCN_PATH_UNAVAILABLE = 'CCN routed-path telemetry is unavailable until a reviewed Guangzhou ingress, CCN route, US VPC endpoint, and distinct WSS endpoint are configured and validated.';
 
   const MODES = {
     direct: {
@@ -34,12 +32,12 @@
     },
     accelerated: {
       label: 'CCN Cross-Border Bandwidth Path', tag: 'CCN PATH',
-      summary: 'A designed logical path: China Mainland ingress, CCN Cross-Border Bandwidth, and a US private origin. Without a configured routed endpoint, this view remains simulated.',
+      summary: 'A designed logical path: China Mainland ingress, CCN Cross-Border Bandwidth, and a US VPC endpoint. Without a configured routed endpoint, this view remains simulated.',
       traceSteps: [
         { key: 'client', text: 'A simulated game command has been sent from the China Mainland Client.' },
         { key: 'ingress', text: 'Stage 1: Guangzhou EIP and ingress CVM are processing the simulated game command.' },
         { key: 'ccn', text: 'Stage 2: CCN Cross-Border Bandwidth is simulated in transit.' },
-        { key: 'egress', text: 'Stage 3: The US private-origin segment is processing the simulated game command.' },
+        { key: 'egress', text: 'Stage 3: The US VPC endpoint is processing the simulated game command.' },
         { key: 'origin', text: 'The Same US Origin received the simulated game command and is returning a simulated ACK.' },
         { key: 'return', text: 'The simulated ACK returned to the China Mainland Client through the configured logical path.' },
       ],
@@ -47,7 +45,7 @@
   };
 
   /** @type {PathMode} */
-  let activeMode = routeLock || (configuredDefaultMode === 'accelerated' && configuredCcnPathWs ? 'accelerated' : (configuredDirectWs ? 'direct' : 'accelerated'));
+  let activeMode = configuredDefaultMode === 'accelerated' && configuredCcnPathWs ? 'accelerated' : (configuredDirectWs ? 'direct' : 'accelerated');
   /** @type {'idle'|'pending'|'complete'} */
   let commandState = 'idle';
   let batchActive = false;
@@ -123,7 +121,7 @@
         this.socket = new WebSocket(this.endpoint);
       } catch {
         this.status = 'error';
-        this.detail = 'The endpoint is invalid or the browser cannot create a WebSocket. Remove the parameter to use simulation mode.';
+        this.detail = 'The reviewed runtime endpoint is invalid or the browser cannot create a WebSocket. Use simulation mode until deployment configuration is corrected.';
         render();
         return;
       }
@@ -225,7 +223,7 @@
     }
     if (client.status === 'connected') return {
       badge: 'REAL ROUTED ACK RTT',
-      connection: 'Configured Guangzhou ingress → CCN → US private-origin WebSocket connected',
+      connection: 'Configured Guangzhou ingress → CCN → US VPC endpoint WebSocket connected',
       detail: client.detail,
       boundary: 'A real browser Command-to-ACK application acknowledgement RTT is recorded through the configured routed endpoint only after a matching ACK. It is not one-way latency, CCN-link latency, throughput, jitter, packet loss, an SLA, or a performance guarantee.',
     };
@@ -252,7 +250,7 @@
     elements.traceModeTag.textContent = mode.tag;
     elements.traceTitle.textContent = `Current: ${mode.label}`;
     elements.traceSummary.textContent = routedConnected
-      ? 'Configured routed endpoint: browser → Guangzhou ingress → CCN Cross-Border Bandwidth → US private origin. Real samples are browser Command-to-ACK application acknowledgement RTT only.'
+      ? 'Configured routed endpoint: browser → Guangzhou ingress → CCN Cross-Border Bandwidth → US VPC endpoint. Real samples are browser Command-to-ACK application acknowledgement RTT only.'
       : mode.summary;
     elements.traceRoutes.forEach((route) => { route.hidden = route.dataset.route !== activeMode; });
     elements.traceSourceLabel.textContent = source === 'real' ? (activeMode === 'accelerated' ? 'REAL ROUTED ACK' : 'REAL DIRECT ACK') : 'SIMULATED';
@@ -279,7 +277,7 @@
       if (clients.accelerated.status === 'connected') {
         status.classList.add('is-direct-connected');
         elements.deploymentStatusLabel.textContent = 'CCN ROUTED TEST CONNECTED';
-        elements.deploymentStatusCopy.textContent = 'The configured Guangzhou ingress → CCN → US private-origin WebSocket is connected. A sample is recorded only after a matching ACK; it is application acknowledgement RTT, not CCN-link latency or an SLA.';
+        elements.deploymentStatusCopy.textContent = 'The configured Guangzhou ingress → CCN → US VPC endpoint WebSocket is connected. A sample is recorded only after a matching ACK; it is application acknowledgement RTT, not CCN-link latency or an SLA.';
         return;
       }
       if (isSafeWebSocketEndpoint(endpoints.accelerated)) {
@@ -311,11 +309,10 @@
     const isBusy = commandState === 'pending';
     elements.modeButtons.forEach((button) => {
       const isSelected = button.dataset.mode === activeMode;
-      const locked = routeLock === 'direct' && button.dataset.mode !== 'direct';
       button.classList.toggle('active', isSelected);
       button.setAttribute('aria-checked', String(isSelected));
-      button.disabled = isBusy || locked;
-      button.querySelector('.mode-state').textContent = locked ? 'Locked to Direct' : (isSelected ? 'Selected' : 'Select');
+      button.disabled = isBusy;
+      button.querySelector('.mode-state').textContent = isSelected ? 'Selected' : 'Select';
     });
     elements.resultModeTag.textContent = MODES[activeMode].tag;
     elements.resultModeTag.className = `path-tag ${activeMode}`;
@@ -464,14 +461,14 @@
 
   /** @param {PathMode} mode */
   function selectMode(mode) {
-    if (mode === activeMode || commandState === 'pending' || (routeLock === 'direct' && mode !== 'direct')) return;
+    if (mode === activeMode || commandState === 'pending') return;
     activeMode = mode; commandState = remainingCommands() === 0 ? 'complete' : 'idle'; batchActive = false;
     elements.ackOverlay.hidden = true; elements.ackOverlay.setAttribute('aria-hidden', 'true');
     elements.commandStageTitle.textContent = `Current: ${MODES[mode].label}`;
     elements.commandStageCopy.textContent = mode === 'direct'
       ? 'Use the fixed command button to send one command. A connected Direct endpoint records a real application ACK RTT; otherwise the page shows the simulated lifecycle.'
       : (clients.accelerated.status === 'connected'
-        ? 'Use the fixed command button to send one command through the configured Guangzhou ingress → CCN → US private-origin endpoint.'
+        ? 'Use the fixed command button to send one command through the configured Guangzhou ingress → CCN → US VPC endpoint.'
         : 'Use the fixed command button to show the simulated CCN architecture lifecycle until the configured routed endpoint connects.');
     elements.liveAck.textContent = 'Waiting for command'; elements.liveFlow.textContent = 'Path ready'; render();
     announce(`Switched to ${MODES[mode].label}. Simulated and real ACK histories remain isolated by path and source.`);

@@ -4,15 +4,15 @@
 
 Official Tencent Cloud CCN documentation: [English](https://www.tencentcloud.com/document/product/1003/30049) | [Chinese](https://www.tencentcloud.com/zh/document/product/1003/30049)
 
-This customer-facing workshop shows how to evaluate a controlled China Mainland public ingress and a CCN-connected private network segment to the same overseas application origin. CCN can provide private connectivity between associated Tencent Cloud network instances; this workshop helps you validate the configured application path before production planning.
+This customer-facing workshop shows how to evaluate a controlled China Mainland public ingress and a CCN-connected private network segment to the same overseas application origin. CCN can provide private connectivity between associated Tencent Cloud network instances; this workshop helps you validate the configured application path before production planning. In this lab, the Direct control path reaches the US Nginx endpoint through its public EIP, while the routed path reaches the same US CVM through its private VPC address over CCN.
 
 > **Important:** do not present CCN as a guaranteed latency reduction or stability improvement. The actual result depends on the complete design, regions, ISP/last-mile path, application, bandwidth configuration, and test conditions. This workshop records functional Command-to-ACK evidence, not a CCN latency benchmark or SLA.
 
 ## Architecture: China Mainland visitor to overseas application
 
-![CCN Workshop architecture: China Mainland visitor -> Guangzhou public ingress -> CCN -> Tencent Cloud Silicon Valley private application origin, with a Direct control path over the public Internet.](docs/architecture-overview.svg)
+![CCN Workshop architecture: China Mainland visitor -> Guangzhou public ingress -> CCN -> Tencent Cloud Silicon Valley private VPC endpoint, with a Direct control path to the same US CVM over the public Internet.](docs/architecture-overview.svg)
 
-**Traffic flow:** the browser enters the public Guangzhou ingress, which forwards application traffic through the reviewed CCN private segment to the private Silicon Valley application origin. The matching ACK returns along the configured path. The dashed Direct control path reaches the same ACK service without the Guangzhou ingress and CCN segment.
+**Traffic flow:** the browser enters the public Guangzhou ingress, which forwards application traffic through the reviewed CCN private segment to the Silicon Valley CVM's private VPC address. The matching ACK returns along the configured path. The dashed Direct control path reaches the same US CVM through its public Nginx endpoint, without the Guangzhou ingress and CCN segment.
 
 ### How CCN supports the optimization design
 
@@ -56,7 +56,7 @@ This workshop demonstrates the following customer-relevant outcomes:
 | Customer pain point | How CCN-oriented design helps | What this workshop proves — and does not prove |
 |---|---|---|
 | Application tiers are split across regions or VPCs | A CCN instance provides a private connectivity layer between associated networks, with routing inspected centrally. | **Proves:** a configured application path can return matching ACKs. **Does not prove:** a production design, capacity, or SLA. |
-| A browser needs a China Mainland entry point while the application origin is private in another region | A public Guangzhou ingress can act as the controlled on-ramp; CCN is the private network segment behind it. | **Proves:** the intended ingress-to-private-origin topology is functionally reachable after validation. **Does not prove:** that a browser connects to CCN directly. |
+| A browser needs a China Mainland entry point while the routed leg must reach a US VPC address | A public Guangzhou ingress can act as the controlled on-ramp; CCN is the private network segment behind it. | **Proves:** the intended ingress-to-US-VPC-endpoint topology is functionally reachable after validation. **Does not prove:** that a browser connects to CCN directly or that the US Nginx endpoint is private-only. |
 | Teams want to avoid comparing different applications when evaluating paths | Direct and routed paths intentionally reach the **same** US ACK service. | **Proves:** a fairer functional control-versus-routed application test. **Does not prove:** a generalized speed improvement. |
 | Network changes are difficult to explain to application stakeholders | The demo turns an abstract route design into a visible command and matching acknowledgement. | **Proves:** application-level continuity under the configured path. **Does not prove:** end-user experience under every ISP, device, or location. |
 
@@ -64,7 +64,7 @@ This workshop demonstrates the following customer-relevant outcomes:
 
 **The browser uses a public front door. CCN is the private highway between cloud networks.**
 
-In this workshop, the Guangzhou EIP/CVM is the public front door. The Guangzhou-to-Silicon-Valley segment is the CCN-connected private network path. The Silicon Valley application remains a private origin behind that path.
+In this workshop, the Guangzhou EIP/CVM is the public front door. The Guangzhou-to-Silicon-Valley segment is the CCN-connected private network path. On the routed leg, Guangzhou reaches the same Silicon Valley CVM through its private VPC address. The Direct control path reaches that CVM's public Nginx endpoint; the Node ACK process remains loopback-only in both paths.
 
 ---
 
@@ -91,9 +91,9 @@ Use this workshop as a starting point when the customer has one or more of these
 
 After completing the workshop, a new customer should be able to:
 
-1. Explain the distinct roles of **browser, EIP, CVM, VPC, subnet, CCN, route table, public ingress, and private origin**.
-2. Create a Direct control path and a separately configured routed path that both reach the same ACK service.
-3. Plan non-overlapping VPC CIDRs, associate the required network instances, inspect the CCN route table, and verify private reachability before enabling routed WSS.
+1. Explain the distinct roles of **browser, EIP, CVM, VPC, subnet, CCN, route table, public ingress, and US VPC endpoint**.
+2. Create a Direct control path through the US public Nginx endpoint and a separately configured routed path through the US private VPC address; both reach the same loopback-only ACK service.
+3. Plan non-overlapping VPC CIDRs, associate the required network instances, inspect the CCN route table, and verify private-VPC reachability before enabling routed WSS.
 4. Understand the recommended CCN workflow: **create CCN -> associate network instances -> check routing -> configure applicable bandwidth**. [Official guide](https://www.tencentcloud.com/document/product/1003/31985).
 5. Treat a matching ACK as an application-continuity signal — not a claim about network performance, SLA, or business outcome.
 6. Apply minimum-exposure controls, document the test result, and clean up billable lab resources deliberately.
@@ -110,7 +110,7 @@ Before creating resources, capture the following with the customer's application
 
 - Source and destination regions, user locations, and traffic direction.
 - Current VPC/IDC topology, CIDR ranges, account ownership, and route dependencies.
-- Public-entry requirements, private-origin ports/protocols, TLS ownership, and authentication model.
+- Public-entry requirements, US VPC endpoint ports/protocols, TLS ownership, and authentication model.
 - Data residency, cross-border data-transfer, and industry compliance requirements.
 - Expected traffic profile, availability target, operational owner, budget owner, and rollback plan.
 
@@ -122,11 +122,11 @@ Build the Direct path first, then add the minimum routed components:
 Browser
   -> Guangzhou EIP + ingress CVM
   -> CCN association and reviewed routes
-  -> Silicon Valley VPC private origin
+  -> Silicon Valley VPC private address
   -> same ACK service
 ```
 
-Do not configure `ccnPathWs` until private-origin reachability, TLS/WSS behavior, route health, security controls, and rollback steps have been verified.
+Do not configure `ccnPathWs` until US VPC endpoint reachability, TLS/WSS behavior, route health, security controls, and rollback steps have been verified.
 
 ### 3. Turn results into a production-design conversation
 
@@ -138,7 +138,7 @@ Bring the completed verification checklist and architecture notes to your Tencen
 - What production success criteria should be tested from representative user networks?
 - Which resources will remain private, which endpoints must be public, and who owns lifecycle/rollback?
 
-**VERIFIED — bandwidth configuration requires a created CCN instance, associated network instances, and no route conflict. Cross-border availability, billing mode, compliance process, and available region pairs are conditional.** Review [Configuring Bandwidth](https://www.tencentcloud.com/document/product/1003/38894) with the account team; do not infer eligibility, price, bandwidth entitlement, or approval from this repository.
+**VERIFIED — bandwidth configuration requires a created CCN instance, associated network instances, and no route conflict. Cross-border availability, billing mode, compliance process, and available region pairs are conditional.** For this Guangzhou–Silicon Valley lab, confirm an eligible **postpaid-by-bandwidth** CCN workflow with the account team before build: current postpaid cross-border capability is limited to that billing mode, while current prepaid cross-border bandwidth supports Chinese mainland–Hong Kong, China only. Review [Configuring Bandwidth](https://www.tencentcloud.com/document/product/1003/38894) and do not infer eligibility, price, bandwidth entitlement, or approval from this repository.
 
 ---
 
@@ -205,31 +205,39 @@ ALLOWED_ORIGINS=http://127.0.0.1:8080 \
 npm start
 ```
 
-In another terminal:
+In another terminal, create the ignored local runtime configuration, then serve the page:
+
+```bash
+cp app/runtime-config.example.js app/runtime-config.js
+```
+
+Edit `app/runtime-config.js` for local Direct testing only:
+
+```js
+window.CCN_DEMO_CONFIG = Object.freeze({
+  directWs: "ws://127.0.0.1:8787/ws",
+  ccnPathWs: "",
+  defaultMode: "direct",
+});
+```
+
+Then run:
 
 ```bash
 python3 -m http.server 8080 -d app
 ```
 
-Open `http://127.0.0.1:8080`.
-
-For a local Direct ACK test, append this query parameter to the page URL:
-
-```text
-?ws=ws://127.0.0.1:8787/ws
-```
-
-The query parameter is supported only for the Direct local-debug path. It cannot activate the routed path.
+Open `http://127.0.0.1:8080`. Real endpoints are accepted only from reviewed runtime configuration; URL query parameters cannot activate either path.
 
 ---
 
 ## Configure real endpoints safely
 
-1. Leave the repository's `app/demo-config.js` with blank endpoint values.
-2. Copy `app/demo-config.example.js` during deployment and replace only the two example WSS hostnames.
-3. Use a reviewed Direct endpoint for `directWs`.
-4. Enable `ccnPathWs` only after verifying the separate Guangzhou ingress, CCN route, Silicon Valley private-origin reachability, TLS/WSS, applicable compliance status, and rollback path.
-5. Never place credentials or tokens in browser configuration or WebSocket URLs.
+1. Keep `app/runtime-config.js` out of Git. It is intentionally ignored and must be generated or copied into the **deployed static web root**, outside the source checkout.
+2. Copy `app/runtime-config.example.js` to `runtime-config.js` in that web root, then replace only the reviewed WSS hostnames.
+3. The static browser page stays on the **US Direct host**. Set `ALLOWED_ORIGINS=https://DIRECT_HOST` when starting the loopback-only ACK service; add another exact origin only if it also serves the browser page.
+4. Use a reviewed Direct endpoint for `directWs`. Enable `ccnPathWs` only after verifying the separate Guangzhou ingress, CCN route, Silicon Valley VPC endpoint reachability, TLS/WSS, applicable compliance status, and rollback path.
+5. Never use wildcards in `ALLOWED_ORIGINS`. Never place credentials, tokens, private IPs, or secrets in runtime configuration or WebSocket URLs.
 
 See [`docs/REFERENCE.md`](docs/REFERENCE.md) for evidence boundaries, deployment detail, and fair comparison conditions.
 
@@ -240,7 +248,7 @@ See [`docs/REFERENCE.md`](docs/REFERENCE.md) for evidence boundaries, deployment
 The following files are configuration examples, so GitHub displays them as code. New workshop participants do **not** need to open them:
 
 - `infra/nginx/us-demo.conf.example`: US Nginx configuration for the static demo and local Node ACK service.
-- `infra/nginx/guangzhou-ingress.conf.example`: Guangzhou Nginx configuration for `/healthz` and `/ws` to the US private origin, including TLS/SNI verification.
+- `infra/nginx/guangzhou-ingress.conf.example`: Guangzhou Nginx configuration for `/healthz` and `/ws` to the US CVM private VPC address, including TLS/SNI verification.
 - `infra/terraform/`: a safe planning scaffold, not a deployed-account template or executable cross-border build.
 
 Use these only with a technical owner after the relevant Workshop step calls for configuration. Before testing a real routed path, complete the applicable Tencent Cloud cross-border compliance and commercial process. Verify topology and route health independently; server ACK metadata alone does not prove browser ingress or CCN routing.

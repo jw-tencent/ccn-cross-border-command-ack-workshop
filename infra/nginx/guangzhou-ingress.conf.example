@@ -2,7 +2,7 @@
 # This ingress intentionally exposes only /healthz and /ws. The root path returns 404.
 
 upstream us_private_origin {
-    # Replace with the private IP or private DNS name of the US origin in the connected VPC.
+    # Replace with the private IP or private DNS name of the US CVM in the connected VPC.
     server 10.20.0.10:443;
     keepalive 16;
 }

@@ -10,10 +10,11 @@ const DEFAULT_MAX_PAYLOAD_BYTES = 64 * 1024;
 const DEFAULT_DEDUPE_TTL_MS = 60 * 1000;
 const DIRECT_ROUTE_ID = 'same-us-origin-direct';
 const DIRECT_ROUTE_STATUS = 'direct_ack_only';
-const DEFAULT_ALLOWED_ORIGIN_PATTERNS = [
-  'http://localhost:*',
-  'http://127.0.0.1:*',
-  'http://[::1]:*',
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1']);
+const DEFAULT_ALLOWED_ORIGINS = [
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+  'http://[::1]:8080',
 ];
 
 /** @typedef {{host: string, port: number, allowedOrigins: string[], routeId: string, routeStatus: string, version: string, maxPayloadBytes: number, dedupeTtlMs: number, warnings: string[]}} ServerConfig */
@@ -31,11 +32,22 @@ function parseAllowedOrigins(rawValue) {
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
-  const resolved = origins.length > 0 ? origins : DEFAULT_ALLOWED_ORIGIN_PATTERNS;
-  if (resolved.some((origin) => origin === '*' || origin.includes('://*.'))) {
-    throw new Error('ALLOWED_ORIGINS does not permit broad wildcard origins.');
-  }
+  const resolved = origins.length > 0 ? origins : DEFAULT_ALLOWED_ORIGINS;
+  resolved.forEach((origin) => {
+    let parsed;
+    try { parsed = new URL(origin); } catch { throw new Error('ALLOWED_ORIGINS must contain exact HTTP(S) origins.'); }
+    if (origin.includes('*') || !['http:', 'https:'].includes(parsed.protocol) || parsed.origin !== origin) {
+      throw new Error('ALLOWED_ORIGINS must contain exact HTTP(S) origins.');
+    }
+  });
   return resolved;
+}
+
+/** @param {string | undefined} value @returns {string} */
+function parseLoopbackHost(value) {
+  const host = value?.trim() || '127.0.0.1';
+  if (!LOOPBACK_HOSTS.has(host)) throw new Error('HOST must be 127.0.0.1 or ::1.');
+  return host;
 }
 
 /**
@@ -65,9 +77,9 @@ function loadConfig(environment = process.env) {
   );
   return {
     // The acknowledgement service must sit behind the TLS reverse proxy.
-    // Bind loopback by default so a cloud security-group rule is never the
-    // only control preventing plaintext WebSocket exposure.
-    host: environment.HOST?.trim() || '127.0.0.1',
+    // Enforce loopback so a cloud security-group rule is never the only
+    // control preventing plaintext WebSocket exposure.
+    host: parseLoopbackHost(environment.HOST),
     port: parseBoundedInteger(environment.PORT, 8787, 1, 65535),
     allowedOrigins: parseAllowedOrigins(environment.ALLOWED_ORIGINS),
     routeId: DIRECT_ROUTE_ID,
@@ -86,14 +98,7 @@ function loadConfig(environment = process.env) {
 
 /** @param {string | undefined} origin @param {string[]} allowedOrigins @returns {boolean} */
 function isOriginAllowed(origin, allowedOrigins) {
-  if (!origin) return false;
-  return allowedOrigins.some((allowedOrigin) => {
-    if (allowedOrigin.endsWith(':*')) {
-      const prefix = allowedOrigin.slice(0, -1);
-      return origin.startsWith(prefix) && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]):\d+$/.test(origin);
-    }
-    return origin === allowedOrigin;
-  });
+  return Boolean(origin) && allowedOrigins.includes(origin);
 }
 
 /** @param {http.ServerResponse} response @param {number} statusCode @param {object} body */

@@ -6,7 +6,7 @@
     <meta name="description" content="CCN Cross-Border Bandwidth customer architecture walkthrough and validation demonstrator" />
     <title>CCN Cross-Border Bandwidth | Customer Demo</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="demo-config.js"></script>
+    <script src="runtime-config.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#demo">Skip to interactive demo</a>
@@ -23,7 +23,7 @@
       <section id="top" class="hero" aria-labelledby="hero-title">
         <div class="eyebrow">CCN CROSS-BORDER BANDWIDTH</div>
           <h1 id="hero-title">Compare Direct and <em>routed ACK paths.</em></h1>
-          <p class="hero-lede">Compare a Public Internet Direct baseline with a configured Guangzhou ingress → CCN → US private-origin Command-to-ACK path.</p>
+          <p class="hero-lede">Compare a Public Internet Direct baseline with a configured Guangzhou ingress → CCN → US VPC endpoint Command-to-ACK path.</p>
 
         <div class="architecture-strip" aria-label="CCN Cross-Border Bandwidth architecture">
           <div><b>CN</b><span>China Mainland<br />Client</span></div>
@@ -32,7 +32,7 @@
           <i class="ccn-link" aria-hidden="true"><small>CCN</small></i>
           <div class="ccn-stage"><b>02</b><span>CCN Cross-Border<br />Bandwidth</span></div>
           <i class="ccn-link" aria-hidden="true"></i>
-          <div><b>03</b><span>US VPC<br />Egress</span></div>
+          <div><b>03</b><span>US VPC<br />Endpoint</span></div>
           <i aria-hidden="true"></i>
           <div><b>US</b><span>Same US<br />Origin</span></div>
         </div>
@@ -65,7 +65,7 @@
           </button>
           <button class="path-button active" type="button" data-mode="accelerated" role="radio" aria-checked="true">
             <span class="path-index">B</span>
-            <span><strong>CCN Cross-Border Bandwidth</strong><small>China ingress → CCN → US egress</small></span>
+            <span><strong>CCN Cross-Border Bandwidth</strong><small>China ingress → CCN → US VPC endpoint</small></span>
             <span class="mode-state">Selected</span>
           </button>
         </div>
@@ -79,7 +79,7 @@
           </div>
           <span id="trace-mode-tag" class="path-tag accelerated">CCN PATH</span>
         </div>
-        <p id="trace-summary" class="trace-summary">A designed logical path: China Mainland ingress, CCN Cross-Border Bandwidth, and US egress to the Same US Origin. All states for this path are simulated in this deliverable.</p>
+        <p id="trace-summary" class="trace-summary">A designed logical path: China Mainland ingress, CCN Cross-Border Bandwidth, and a US VPC endpoint to the Same US Origin. All states for this path are simulated in this deliverable.</p>
 
         <div class="trace-route direct-route" data-route="direct" hidden>
           <article class="trace-node" data-step="client"><b>CN</b><h3>Client</h3><p>China Mainland</p></article>
@@ -96,7 +96,7 @@
           <i class="route-line ccn-line" aria-hidden="true"></i>
           <article class="trace-node ccn-node" data-step="ccn"><b>02</b><h3>CCN Bandwidth</h3><p>Approval required</p></article>
           <i class="route-line ccn-line" aria-hidden="true"></i>
-          <article class="trace-node" data-step="egress"><b>03</b><h3>US Egress</h3><p>EIP + CVM/SNAT</p></article>
+          <article class="trace-node" data-step="egress"><b>03</b><h3>US VPC endpoint</h3><p>Private CVM address</p></article>
           <i class="route-line" aria-hidden="true"></i>
           <article class="trace-node" data-step="origin"><b>US</b><h3>Same US Origin</h3><p>ACK target</p></article>
         </div>

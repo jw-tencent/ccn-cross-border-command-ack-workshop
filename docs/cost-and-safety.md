@@ -30,7 +30,7 @@ This Workshop should use a minimum-exposure topology:
 
 ```text
 Public browser -> HTTPS/WSS only -> Guangzhou ingress
-Guangzhou ingress -> CCN private route -> Silicon Valley private origin
+Guangzhou ingress -> CCN private route -> Silicon Valley CVM private VPC address
 Node ACK service -> loopback only
 ```
 
@@ -44,7 +44,7 @@ Minimum controls:
 - Expose only intended Guangzhou ingress paths such as `/healthz` and `/ws`.
 - Retain upstream TLS certificate and hostname verification; do not use `proxy_ssl_verify off` as a workaround.
 - Use separate Direct and routed hostnames.
-- Put live endpoint values only in deployment-time configuration, never in the repository default.
+- Generate live endpoint values only in ignored `runtime-config.js` in the deployed static web root, outside the source checkout; never place them in a tracked source file.
 
 ## What must never be committed
 

@@ -4,19 +4,15 @@ Use this checklist immediately before creating or pushing a public GitHub reposi
 
 ## Release scope
 
-Publish this sanitized Workshop directory only:
-
-```text
-ccn-cross-border-command-ack-demo/
-```
+Publish only the sanitized Workshop repository root. Do not rename or copy a live deployment workspace into this public repository.
 
 Do **not** copy the live deployment workspace or any production server directory into the public repository.
 
 ## Pre-push checks
 
 ```text
-[ ] `app/demo-config.js` has blank `directWs` and `ccnPathWs` values
-[ ] `app/demo-config.example.js` uses placeholder domains only
+[ ] `app/runtime-config.js` is absent from Git and is listed in `.gitignore`
+[ ] `app/runtime-config.example.js` uses placeholder domains only
 [ ] No public/private IP addresses, production domains, account IDs, or cloud resource IDs remain
 [ ] No `.env`, certificates, private keys, Terraform state, Terraform plans, or local tfvars remain
 [ ] `.gitignore` covers secrets, deployment-local configuration, and Terraform state
@@ -54,7 +50,7 @@ Before the `git commit`, inspect `git status` and `git diff --cached` manually. 
 ## Post-push validation
 
 1. Open the GitHub repository as an unauthenticated viewer.
-2. Confirm `app/demo-config.js` has blank endpoint values.
+2. Confirm `app/runtime-config.js` is not tracked and `app/runtime-config.example.js` contains placeholder values only.
 3. Check that GitHub renders `README.md` and all learning links correctly.
 4. Confirm GitHub Actions passes without cloud credentials.
 5. Search the GitHub repository for your former production domain, EIPs, account IDs, and resource IDs.

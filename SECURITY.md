@@ -15,10 +15,10 @@ Do not open a public issue for a potential security vulnerability. Contact the r
 
 ## Deployment requirements
 
-- Keep the Node ACK service bound to loopback and terminate public TLS/WSS at a reviewed reverse proxy.
-- Use exact `ALLOWED_ORIGINS`; wildcard Origins are rejected by the included service.
+- Keep the Node ACK service bound to `127.0.0.1` or `::1`; the included service rejects non-loopback `HOST` values. Terminate public TLS/WSS at a reviewed reverse proxy.
+- Use exact `ALLOWED_ORIGINS`; wildcard origins and paths are rejected by the included service.
 - Use WSS in public deployments.
-- Store production endpoint configuration outside Git or through a deployment secret/configuration system.
+- Generate production endpoint configuration only as ignored `runtime-config.js` in the deployed static web root, outside the source checkout.
 - Do not expose the project directory as the web root. Publish only static browser assets.
 - Treat `/healthz` as an application readiness probe, not a CCN path or performance proof.
 

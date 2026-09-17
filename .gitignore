@@ -9,8 +9,11 @@
 *.p12
 
 # Deployment-local endpoint configuration
-app/demo-config.local.js
-app/demo-config.production.js
+# The deployed runtime config is generated outside the source checkout or copied
+# into the static web root after deployment. Never track it.
+app/runtime-config.js
+app/runtime-config.local.js
+app/runtime-config.production.js
 
 # Terraform state and local provider data
 .terraform/

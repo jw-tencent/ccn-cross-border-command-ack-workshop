@@ -10,7 +10,7 @@ Build and validate this small, controlled application path:
 China Mainland browser
   -> Guangzhou public ingress
   -> Guangzhou <-> Silicon Valley CCN private segment
-  -> Silicon Valley private application origin
+  -> Silicon Valley CVM private VPC address
   -> matching ACK returns to the browser
 ```
 
@@ -37,9 +37,9 @@ Do **not** use this as a generic website-acceleration tutorial. CCN is the priva
 
 - **Public front door:** the Guangzhou EIP + CVM lets the browser arrive.
 - **Private highway:** CCN connects the Guangzhou and Silicon Valley cloud networks.
-- **Destination building:** the Silicon Valley private application origin answers the request.
+- **Destination building:** the routed leg reaches the Silicon Valley CVM through its private VPC address.
 
-A browser reaches the public front door first. It does not connect to CCN directly.
+A browser reaches the public front door first. It does not connect to CCN directly. The Direct control path reaches the same US CVM's public Nginx endpoint; the Node ACK process remains loopback-only in both paths.
 
 ## 3. Beginner launchpad: choose your role before you build
 
@@ -49,7 +49,7 @@ This is a guided customer workshop, not a one-person, one-click deployment. Use 
 |---|---|---|
 | **Customer or project owner** | Defines the business scenario, lab scope, resource owner, expiry date, and next decision. | Is this a suitable CCN evaluation, and may the lab proceed? |
 | **Technical owner** | Runs the sample preflight, creates CVMs/VPCs/EIPs, deploys Nginx and the ACK service, configures DNS/TLS, and sets endpoint configuration. | Is each application endpoint working safely? |
-| **Network and security owner** | Approves non-overlapping CIDRs, security-group access, CCN associations, routes, and private-origin access. | Is the private path valid and appropriately exposed? |
+| **Network and security owner** | Approves non-overlapping CIDRs, security-group access, CCN associations, routes, and access to the US VPC endpoint. | Is the private path valid and appropriately exposed? |
 | **Account, budget, and compliance owner** | Confirms account permissions, budget, cross-border eligibility, applicable approval, and bandwidth/commercial workflow. | Are you permitted and ready to create this cross-border lab? |
 | **Test owner** | Runs the matched Direct and routed tests from a suitable China Mainland client and records successes and failures. | Did both configured application paths return matching ACKs? |
 
@@ -67,10 +67,12 @@ This is a guided customer workshop, not a one-person, one-click deployment. Use 
 | Account and budget | A permitted Tencent Cloud account, budget owner, resource owner, and expiry date are confirmed. | Do not create CVMs, EIPs, CCN, or bandwidth resources. |
 | Technical ownership | A named technical owner can operate CVM, DNS, TLS, Nginx, and endpoint configuration. | Do not begin the deployment steps. |
 | Network and security | A network/security owner can approve CIDRs, routes, and public administrative access. | Do not connect VPCs or expose an ingress. |
-| Cross-border gate | The account/compliance owner has confirmed the current eligibility and applicable approval workflow. | Do not order or enable cross-border bandwidth; obtain the required guidance first. |
+| Cross-border gate | For this Guangzhou–Silicon Valley lab, the account/compliance owner has confirmed an eligible **postpaid-by-bandwidth** CCN workflow, the applicable approval, China Unicom agreement/commercial process, and available capacity. | Do not order or enable cross-border bandwidth; obtain the required guidance first. |
 | Final test client | A suitable China Mainland test client is identified for the final matched comparison. | You may check setup elsewhere, but do not present the result as China Mainland experience. |
 
 **Go / no-go rule:** proceed to Step 1 only when the lab, account/budget, technical, network/security, and cross-border owners are clear. A missing owner is a stop condition, not a detail to solve later.
+
+> **Hard eligibility gate for this Guangzhou–Silicon Valley lab:** confirm with Tencent Cloud that the account can use a **postpaid-by-bandwidth CCN instance** for the intended Chinese mainland–US link and complete the applicable compliance, China Unicom agreement, commercial, and capacity workflow. Current prepaid cross-border bandwidth supports Chinese mainland–Hong Kong, China only. If this gate is not met, stop at the architecture-review stage. Source: [Configuring Bandwidth](https://www.tencentcloud.com/document/product/1003/38894).
 
 ## 4. Before you create anything
 
@@ -81,7 +83,7 @@ Confirm these items with the people who own the application, network, security, 
 | You need | Why it matters |
 |---|---|
 | Tencent Cloud account with permission to create VPCs, CVMs, EIPs, and CCN resources | The workshop creates cloud resources and may incur charges. |
-| A US-region application location | This guide uses Silicon Valley as the reference private origin. |
+| A US-region application location | This guide uses Silicon Valley as the reference US CVM. Direct reaches its public Nginx endpoint; routed traffic reaches its private VPC address. |
 | A Guangzhou ingress location | This guide uses Guangzhou as the China Mainland public entry point. |
 | Two non-overlapping VPC address ranges | Private routing cannot be unambiguous when the same IP range exists at both ends. |
 | A public DNS name and TLS certificate for each endpoint | Browsers need separate secure Direct and routed WSS endpoints. |
@@ -105,9 +107,9 @@ Before creating a CVM or EIP, read [cost-and-safety.md](cost-and-safety.md). It 
 | Public access | **DNS name** | A human-readable endpoint name, such as `demo.example.com`, that points to an EIP. |
 | Public access | **TLS / WSS** | TLS secures the browser connection; WSS is Secure WebSocket, used here to send a command and receive an ACK. |
 | Connectivity | **CCN** | The private connectivity layer between associated VPCs. A browser does not connect to it directly. |
-| Connectivity | **Private origin** | The Silicon Valley application endpoint reached from Guangzhou through the private network path. |
+| Connectivity | **US VPC endpoint** | The Silicon Valley CVM's private address, reached from Guangzhou through the CCN-connected private network path. |
 | Security | **Security group** | Firewall rules that control which traffic can reach a CVM. |
-| Security | **Nginx** | The web gateway that receives HTTPS/WSS and forwards it to the local service or private origin. |
+| Security | **Nginx** | The web gateway that receives HTTPS/WSS and forwards it to the local service or US VPC endpoint. |
 | Validation | **ACK** | A small acknowledgement message showing that the application received a command and replied. |
 
 Need more detail? See [REFERENCE.md](REFERENCE.md) only while you are on a specific technical step. You do not need to read it first.
@@ -126,9 +128,9 @@ Before a technical owner opens the deployment references, use the [Console build
 |---|---|---|---|
 | Before any cloud resource | README + Tencent Cloud Console | Choose CIDRs, DNS names, resource owner, expiry date, and budget/compliance owner. | Do not create a CCN, CVM, EIP, or run Terraform. |
 | Build the Direct control path | Tencent Cloud Console + US CVM | Create the **US VPC, subnet, CVM, and EIP**. Deploy Nginx and the ACK service. | Do not create the Guangzhou CVM or set `ccnPathWs`. |
-| Build the routed entry point | Tencent Cloud Console + Guangzhou CVM | Create the **Guangzhou VPC, subnet, CVM, and EIP**. Set up its DNS and TLS. | Do not treat it as a second website or expose the US private origin directly. |
-| Connect the private networks | CCN Console | Create CCN, associate both VPCs, check routes, then complete applicable cross-border approval and bandwidth steps. | Do not enable the routed browser endpoint until private health is successful. |
-| Enable the demo | Guangzhou CVM + deployed static site | Configure Nginx proxying and set `ccnPathWs` in the deployment-time config. | Do not commit live endpoints or credentials. |
+| Build the routed entry point | Tencent Cloud Console + Guangzhou CVM | Create the **Guangzhou VPC, subnet, CVM, and EIP**. Set up its DNS and TLS. | Do not treat it as a second website or expose the US ACK process directly. |
+| Connect the private networks | CCN Console | Create CCN, associate both VPCs, check routes, then complete the account-confirmed cross-border approval and bandwidth steps. | Do not enable the routed browser endpoint until private health is successful. |
+| Enable the demo | Guangzhou CVM + static site already deployed on the US Direct host | Configure Guangzhou Nginx proxying and set `ccnPathWs` in the ignored runtime config in the US static web root. | Do not deploy the browser page on Guangzhou or commit live endpoints or credentials. |
 | After a successful manual workshop | Terraform, if you decide to automate a future lab | Use Terraform only for repeatable non-production foundation resources after reviewing the current provider/docs. | Do not expect Terraform to obtain cross-border compliance, purchase bandwidth, configure production DNS/certificates, or replace security review. |
 
 ### The exact order to remember
@@ -183,17 +185,29 @@ ALLOWED_ORIGINS=http://127.0.0.1:8080 \
 npm start
 ```
 
-In a second terminal:
+In a second terminal, create the ignored local runtime configuration:
+
+```bash
+cp app/runtime-config.example.js app/runtime-config.js
+```
+
+For this local Direct preflight, edit `app/runtime-config.js` to use:
+
+```js
+window.CCN_DEMO_CONFIG = Object.freeze({
+  directWs: "ws://127.0.0.1:8787/ws",
+  ccnPathWs: "",
+  defaultMode: "direct",
+});
+```
+
+Then run:
 
 ```bash
 python3 -m http.server 8080 -d app
 ```
 
-Open:
-
-```text
-http://127.0.0.1:8080?ws=ws://127.0.0.1:8787/ws
-```
+Open `http://127.0.0.1:8080`.
 
 **Expected result**
 
@@ -203,7 +217,7 @@ http://127.0.0.1:8080?ws=ws://127.0.0.1:8787/ws
 
 **If you are blocked**
 
-Check that Node.js 22+ and Python 3 are installed, and that the first terminal still has the Node service running. The local query parameter works only for Direct debugging; it cannot activate the routed path.
+Check that Node.js 22+ and Python 3 are installed, that the first terminal still has the Node service running, and that the ignored `app/runtime-config.js` contains the local Direct endpoint. URL query parameters cannot activate either path.
 
 ---
 
@@ -212,10 +226,19 @@ Check that Node.js 22+ and Python 3 are installed, and that the first terminal s
 **Do**
 
 1. Create a US VPC and CVM.
-2. Run the included Node ACK service on `127.0.0.1:8787`.
+2. Run the included Node ACK service on loopback only. Before starting it, set the exact browser origin for the page hosted on the Direct host:
+
+```bash
+HOST=127.0.0.1 \
+PORT=8787 \
+ALLOWED_ORIGINS=https://DIRECT_HOST \
+npm start
+```
+
+Replace `DIRECT_HOST` with the deployed Direct page hostname. Add another comma-separated exact origin only if it also serves the browser page; do not use wildcards.
 3. Install Nginx and publish only the browser files from `app/` in a dedicated web root.
-4. Add an EIP, the Direct DNS name, and TLS certificate.
-5. Set only `directWs` in the deployment-time `app/demo-config.js`:
+4. Add an EIP, the Direct DNS name, and TLS certificate. The Direct control path reaches this US Nginx endpoint publicly; the Node ACK service remains loopback-only.
+5. In the deployed static web root, copy `runtime-config.example.js` to the ignored `runtime-config.js`, then set only `directWs`:
 
 ```js
 window.CCN_DEMO_CONFIG = Object.freeze({
@@ -225,7 +248,7 @@ window.CCN_DEMO_CONFIG = Object.freeze({
 });
 ```
 
-6. From the browser, send ten sequential Direct commands.
+6. From the browser page on `https://DIRECT_HOST`, send ten sequential Direct commands.
 
 **Expected result**
 
@@ -262,11 +285,10 @@ A `404` at `https://ccn-path.example.com/` is expected in this design. The host 
 
 **Do**
 
-1. Create a CCN instance.
-2. Associate the Guangzhou and US VPCs.
+1. Confirm the account is eligible for this Guangzhou–Silicon Valley lab before activation: current postpaid cross-border capability is limited to **postpaid by bandwidth**; current prepaid cross-border bandwidth supports Chinese mainland–Hong Kong, China only. Complete the account-confirmed compliance, China Unicom agreement/commercial, and capacity workflow.
+2. Create the eligible CCN instance and associate the Guangzhou and US VPCs according to the current account-confirmed Console sequence.
 3. Check the CCN route table and VPC routes. Each VPC must have a valid route to the other VPC's CIDR, with no overlap or conflict.
-4. Complete the applicable cross-border compliance and bandwidth workflow in the Tencent Cloud console.
-5. From the Guangzhou CVM, verify HTTPS reachability to the **US private IP** of the origin while preserving the TLS hostname:
+4. From the Guangzhou CVM, verify HTTPS reachability to the **US CVM private IP** while preserving the Direct TLS hostname:
 
 ```bash
 curl --resolve demo.example.com:443:US_PRIVATE_IP \
@@ -275,7 +297,7 @@ curl --resolve demo.example.com:443:US_PRIVATE_IP \
 
 **Expected result**
 
-The private health check returns the expected JSON response from the US ACK origin.
+The private-VPC health check returns the expected JSON response from the same US ACK service reached by the Direct path.
 
 **If you are blocked**
 
@@ -283,7 +305,7 @@ Stop browser testing and check, in order: VPC CIDRs, CCN association, selected r
 
 **Important**
 
-Tencent Cloud's documented CCN sequence is **create CCN -> associate network instances -> check route table -> configure bandwidth**. [Official CCN guide](https://www.tencentcloud.com/document/product/1003/31985). Cross-border eligibility, approval, billing, bandwidth, and available region pairs must be checked in the current console and commercial process; this repository cannot grant them.
+Tencent Cloud's documented CCN sequence is **create CCN -> associate network instances -> check route table -> configure bandwidth**. [Official CCN guide](https://www.tencentcloud.com/document/product/1003/31985). For this cross-border lab, current postpaid CCN capability requires the **postpaid-by-bandwidth** billing mode; prepaid cross-border bandwidth currently supports Chinese mainland–Hong Kong, China only. Confirm current approval, China Unicom agreement, billing, capacity, and region-pair eligibility in [Configuring Bandwidth](https://www.tencentcloud.com/document/product/1003/38894) and the account process; this repository cannot grant them.
 
 ---
 
@@ -291,10 +313,10 @@ Tencent Cloud's documented CCN sequence is **create CCN -> associate network ins
 
 **Do**
 
-1. Configure Nginx on Guangzhou to forward `/healthz` and `/ws` to the US private origin.
+1. Configure Nginx on Guangzhou to forward `/healthz` and `/ws` to the US CVM private VPC address.
 2. Retain upstream TLS certificate and hostname verification.
 3. Verify the Guangzhou public health endpoint.
-4. Only now set `ccnPathWs` in the deployment-time configuration:
+4. Only now, in the **US Direct host's static web root**, update the ignored `runtime-config.js` with `ccnPathWs`:
 
 ```js
 window.CCN_DEMO_CONFIG = Object.freeze({
@@ -303,6 +325,8 @@ window.CCN_DEMO_CONFIG = Object.freeze({
   defaultMode: "direct",
 });
 ```
+
+Do not deploy the browser page on `ccn-path.example.com`; its root path intentionally returns `404`.
 
 **Expected result**
 

@@ -11,10 +11,10 @@ Direct control path
 Browser -> Public Internet -> US ACK service
 
 Configured routed path
-Browser -> Guangzhou public ingress -> CCN -> Silicon Valley private origin -> same ACK service
+Browser -> Guangzhou public ingress -> CCN -> Silicon Valley CVM private VPC address -> same ACK service
 ```
 
-The Direct path is the control. The routed path checks whether the configured Guangzhou-to-Silicon-Valley design works. Both paths end at the **same** ACK service so that you are not comparing different application versions.
+The Direct path is the control and reaches the US CVM's public Nginx endpoint. The routed path checks whether the configured Guangzhou-to-Silicon-Valley private VPC leg works. Both paths end at the **same** loopback-only ACK service so that you are not comparing different application versions. This lab does not demonstrate a strictly private-only US web origin.
 
 A result appears only when the browser receives an ACK with the same `eventId` as its command:
 
@@ -42,8 +42,8 @@ For a customer-relevant comparison, use the same China Mainland client and netwo
 | **Ingress** | The public front door. Here it is a Guangzhou CVM with an EIP and Nginx. |
 | **CCN** | The private connectivity layer between associated cloud networks. It is not a browser setting. |
 | **Route table** | The network map that decides where a private IP range is reached. |
-| **Private origin** | The Silicon Valley application endpoint reached over its private IP from Guangzhou. |
-| **Nginx** | The web gateway: it terminates HTTPS/WSS and forwards browser requests to the local service or private origin. |
+| **US VPC endpoint** | The Silicon Valley CVM's private IP, reached from Guangzhou over CCN. |
+| **Nginx** | The web gateway: it terminates HTTPS/WSS and forwards browser requests to the local service or US VPC endpoint. |
 | **WSS** | Secure WebSocket. The browser uses it to send a command and wait for a matching ACK. |
 
 ## 3. Minimum topology and security controls
@@ -53,7 +53,7 @@ Public browser
   -> HTTPS/WSS only
   -> Guangzhou EIP + Nginx ingress
   -> CCN private route
-  -> Silicon Valley private origin
+  -> Silicon Valley CVM private VPC address
   -> Node ACK service on loopback
 ```
 
@@ -74,9 +74,15 @@ For cost, public-exposure, and stop conditions, read [cost-and-safety.md](cost-a
 ### US Direct origin
 
 1. Create a US VPC and CVM.
-2. Run the included Node ACK service on `127.0.0.1:8787` with exact `ALLOWED_ORIGINS`.
-3. Publish only `app/` browser assets in a dedicated Nginx web root.
-4. Add an EIP, your Direct DNS hostname, and TLS.
+2. Run the included Node ACK service on `127.0.0.1:8787` with the exact browser origin hosted on the Direct host:
+
+   ```bash
+   HOST=127.0.0.1 PORT=8787 ALLOWED_ORIGINS=https://DIRECT_HOST npm start
+   ```
+
+   Use a comma-separated additional origin only when it also serves the browser page. Wildcards are rejected.
+3. Publish only browser assets plus an ignored, deployment-generated `runtime-config.js` in a dedicated Nginx web root outside the source checkout.
+4. Add an EIP, your Direct DNS hostname, and TLS. The Direct path reaches this public Nginx endpoint; the Node ACK service itself remains loopback-only.
 5. Use [`../infra/nginx/us-demo.conf.example`](../infra/nginx/us-demo.conf.example) as the starting point.
 
 Expected checks:
@@ -93,24 +99,24 @@ wss://DIRECT_HOST/ws -> Direct connection and matching ACK
 2. Assign a separate routed DNS hostname and TLS certificate to the Guangzhou EIP.
 3. Create a CCN instance and associate both VPCs.
 4. Inspect CCN routes and VPC routes. The route toward the other VPC must be valid and unambiguous.
-5. Complete the applicable cross-border approval and bandwidth process in the current Tencent Cloud console.
-6. From Guangzhou, test the US private origin before exposing the routed WSS endpoint.
+5. Complete the account-confirmed cross-border approval and bandwidth process. For this Guangzhou–Silicon Valley lab, current postpaid cross-border capability requires **postpaid by bandwidth**; prepaid cross-border bandwidth currently supports Chinese mainland–Hong Kong, China only.
+6. From Guangzhou, test the US CVM private VPC address before exposing the routed WSS endpoint.
 7. Configure Nginx with [`../infra/nginx/guangzhou-ingress.conf.example`](../infra/nginx/guangzhou-ingress.conf.example).
 
-Private-origin health test template:
+US VPC endpoint health test template:
 
 ```bash
 curl --resolve DIRECT_HOST:443:US_PRIVATE_IP \
   https://DIRECT_HOST/healthz
 ```
 
-Replace `DIRECT_HOST` and `US_PRIVATE_IP` with your own deployment values. A successful result should be the expected health JSON. If it fails, fix CIDRs, CCN association, route tables, security groups, upstream service, or TLS/SNI before continuing.
+Replace `DIRECT_HOST` and `US_PRIVATE_IP` with your own deployment values. A successful result should be the expected health JSON from the same ACK service used by the Direct path. If it fails, fix CIDRs, CCN association, route tables, security groups, upstream service, or TLS/SNI before continuing.
 
-**VERIFIED — Tencent Cloud's standard CCN flow is: create a CCN instance, associate network instances, check route tables, then configure bandwidth.** See [Getting Started with CCN](https://www.tencentcloud.com/document/product/1003/31985). Cross-border eligibility, approval, region pairs, billing, and available bandwidth are account- and product-condition dependent. Review [Configuring Bandwidth](https://www.tencentcloud.com/document/product/1003/38894) and the current console before ordering.
+**VERIFIED — Tencent Cloud's standard CCN flow is: create a CCN instance, associate network instances, check route tables, then configure bandwidth.** See [Getting Started with CCN](https://www.tencentcloud.com/document/product/1003/31985). Cross-border eligibility, approval, region pairs, billing, and available bandwidth are account- and product-condition dependent. For this lab, current postpaid cross-border capability requires **postpaid by bandwidth**; prepaid cross-border bandwidth currently supports Chinese mainland–Hong Kong, China only. Review [Configuring Bandwidth](https://www.tencentcloud.com/document/product/1003/38894) and the current console before ordering.
 
 ## 5. Endpoint configuration and verification gate
 
-Only after the preceding checks pass, create a deployment-time `app/demo-config.js`:
+Only after the preceding checks pass, generate `runtime-config.js` in the deployed **US Direct-host static web root**. This file is intentionally ignored by Git and must remain outside the source checkout:
 
 ```js
 window.CCN_DEMO_CONFIG = Object.freeze({
@@ -131,7 +137,7 @@ Required results:
 | Routed endpoint is unavailable or malformed | Unavailable/pending state and **no** successful routed RTT |
 | Guangzhou root `/` returns `404` | Normally expected; the ingress is not a second website |
 
-The routed endpoint cannot be activated by a URL query parameter. Never put credentials, access tokens, private IPs, or production-only hostnames into the public repository.
+Neither endpoint can be activated by a URL query parameter. Never put credentials, access tokens, private IPs, or production-only hostnames into the public repository or tracked source files.
 
 ## 6. Fast troubleshooting
 
@@ -139,8 +145,8 @@ The routed endpoint cannot be activated by a URL query parameter. Never put cred
 |---|---|
 | Direct endpoint unavailable | US Node health, US Nginx, Direct DNS/TLS, `ALLOWED_ORIGINS` |
 | Routed endpoint unavailable | Routed DNS/TLS, Guangzhou EIP/security group, Guangzhou Nginx error log |
-| Guangzhou `/healthz` returns `502` | Private-origin health check, CCN routes, upstream TLS hostname/SNI verification |
-| Private health works but browser WSS fails | Nginx Upgrade headers, public certificate/SNI, browser console, public ingress path |
+| Guangzhou `/healthz` returns `502` | US VPC endpoint health check, CCN routes, upstream TLS hostname/SNI verification |
+| US VPC health works but browser WSS fails | Nginx Upgrade headers, public certificate/SNI, browser console, public ingress path |
 | `curl -I /healthz` returns `404` | The sample health handler may support `GET` only; use `curl -s https://HOST/healthz` |
 | A result appears after an unmatched/failed command | Treat it as a demo defect; do not use the sample |
 

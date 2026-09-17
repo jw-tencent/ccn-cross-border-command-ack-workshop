@@ -7,7 +7,7 @@ Use this procedure after every Workshop lab. It is designed to reduce the chance
 ## Before you remove cloud resources
 
 1. Record the Workshop outcome, validation scope, and any failed checks in your approved project location.
-2. Remove the live routed endpoint from the deployed browser configuration:
+2. Remove the live routed endpoint from the ignored `runtime-config.js` in the deployed browser web root:
 
    ```js
    ccnPathWs: ""

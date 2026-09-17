@@ -91,6 +91,44 @@ function connectWebSocket(port) {
   });
 }
 
+/** @param {number} port @param {string | undefined} origin @returns {Promise<number>} */
+function requestUpgradeStatus(port, origin) {
+  return new Promise((resolve, reject) => {
+    const socket = net.createConnection({ host: '127.0.0.1', port });
+    let settled = false;
+    const finish = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      callback(value);
+    };
+    const timeout = setTimeout(() => finish(reject, new Error('Timed out waiting for rejected WebSocket handshake.')), 3000);
+    socket.on('connect', () => {
+      const key = crypto.randomBytes(16).toString('base64');
+      const headers = [
+        'GET /ws HTTP/1.1', `Host: 127.0.0.1:${port}`, 'Upgrade: websocket', 'Connection: Upgrade',
+        `Sec-WebSocket-Key: ${key}`, 'Sec-WebSocket-Version: 13',
+      ];
+      if (origin) headers.push(`Origin: ${origin}`);
+      headers.push('\r\n');
+      socket.write(headers.join('\r\n'));
+    });
+    socket.on('data', (chunk) => {
+      const match = /^HTTP\/1\.1 (\d{3})/.exec(chunk.toString('ascii'));
+      if (!match) return finish(reject, new Error('Invalid WebSocket handshake response.'));
+      clearTimeout(timeout);
+      finish(resolve, Number(match[1]));
+    });
+    socket.on('error', (error) => { clearTimeout(timeout); finish(reject, error); });
+    socket.on('close', () => {
+      if (!settled) {
+        clearTimeout(timeout);
+        finish(reject, new Error('WebSocket closed before a handshake response.'));
+      }
+    });
+  });
+}
+
 /** @returns {Promise<number>} */
 function reserveLocalPort() {
   return new Promise((resolve, reject) => {
@@ -157,6 +195,8 @@ async function main() {
       statusCode: 200,
       body: { status: 'ok', version: 'smoke', routeId: 'same-us-origin-direct', routeStatus: 'direct_ack_only' },
     });
+    assert.equal(await requestUpgradeStatus(port, 'http://localhost:49152'), 403);
+    assert.equal(await requestUpgradeStatus(port, undefined), 403);
     client = await connectWebSocket(port);
     const command = Buffer.from(JSON.stringify({ type: 'game_command', eventId: 'smoke-event-1', command: 'fire', clientSentMonoMs: 12.5, schemaVersion: 1 }), 'utf8');
     const accepted = client.nextJson(); client.socket.write(makeMaskedTextFrame(command));
