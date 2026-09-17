@@ -64,7 +64,8 @@ test('new customers have one clear workshop path before technical quick-start ma
   const startHere = fs.readFileSync(START_HERE_MD_PATH, 'utf8');
   const visualGuide = fs.readFileSync(START_HERE_HTML_PATH, 'utf8');
 
-  assert.match(readme, /# 腾讯云 Cloud Connect Network（CCN）Beginner Workshop/);
+  assert.match(readme, /# Tencent Cloud Cloud Connect Network \(CCN\) Beginner Workshop/);
+  assert.match(readme, /Official Tencent Cloud CCN documentation: \[English\].*\[Chinese\]/);
   assert.match(readme, /Are you experiencing high latency when visitors in China Mainland access websites or applications hosted overseas\?/);
   assert.match(readme, /## Architecture: China Mainland visitor to overseas application/);
   assert.match(readme, /flowchart LR/);

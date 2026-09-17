@@ -1,6 +1,8 @@
-# 腾讯云 Cloud Connect Network（CCN）Beginner Workshop
+# Tencent Cloud Cloud Connect Network (CCN) Beginner Workshop
 
 **Are you experiencing high latency when visitors in China Mainland access websites or applications hosted overseas?**
+
+Official Tencent Cloud CCN documentation: [English](https://www.tencentcloud.com/document/product/1003/30049) | [Chinese](https://www.tencentcloud.com/zh/document/product/1003/30049)
 
 This customer-facing workshop shows how to evaluate a controlled China Mainland public ingress and a CCN-connected private network segment to the same overseas application origin. CCN can provide private connectivity between associated Tencent Cloud network instances; this workshop helps you validate the configured application path before production planning.
 
@@ -113,7 +115,7 @@ Before creating resources, capture the following with the customer's application
 - Source and destination regions, user locations, and traffic direction.
 - Current VPC/IDC topology, CIDR ranges, account ownership, and route dependencies.
 - Public-entry requirements, private-origin ports/protocols, TLS ownership, and authentication model.
-- Data Residency (数据驻留), cross-border data-transfer, and industry compliance requirements.
+- Data residency, cross-border data-transfer, and industry compliance requirements.
 - Expected traffic profile, availability target, operational owner, budget owner, and rollback plan.
 
 ### 2. Validate the smallest truthful topology
