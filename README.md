@@ -10,17 +10,9 @@ This customer-facing workshop shows how to evaluate a controlled China Mainland 
 
 ## Architecture: China Mainland visitor to overseas application
 
-```mermaid
-flowchart LR
-  Visitor[China Mainland visitor<br/>Browser] <-->|HTTPS/WSS<br/>Command and matching ACK| GZ[Guangzhou public ingress<br/>EIP + CVM + Nginx]
-  GZ <-->|Private application traffic| CCN[Cloud Connect Network<br/>Guangzhou <-> Silicon Valley]
-  CCN <-->|Private routing| SV[Tencent Cloud<br/>Silicon Valley VPC]
-  SV <-->|Local reverse proxy| App[Private application origin<br/>Same ACK service]
+![CCN Workshop architecture: China Mainland visitor -> Guangzhou public ingress -> CCN -> Tencent Cloud Silicon Valley private application origin, with a Direct control path over the public Internet.](docs/architecture-overview.svg)
 
-  Visitor -. Direct control path over Public Internet .-> App
-```
-
-**Traffic flow:** the browser enters the public Guangzhou ingress, which forwards application traffic through the reviewed CCN private segment to the private Silicon Valley application origin. The matching ACK returns along the configured path. The dotted Direct control path reaches the same ACK service without the Guangzhou ingress and CCN segment.
+**Traffic flow:** the browser enters the public Guangzhou ingress, which forwards application traffic through the reviewed CCN private segment to the private Silicon Valley application origin. The matching ACK returns along the configured path. The dashed Direct control path reaches the same ACK service without the Guangzhou ingress and CCN segment.
 
 ### How CCN supports the optimization design
 
@@ -39,9 +31,9 @@ It is the one guide to follow from beginning to end. It explains the goal, who t
 
 > **Build method:** this is a **Tencent Cloud Console-first** workshop. Create the US CVM first, validate the Direct path, then create the Guangzhou CVM, CCN, and routed path. Do **not** run Terraform at the start: the current Terraform folder is a safe reference scaffold, not an executable deployment.
 
-- **Want a 2-minute picture first?** Open the [visual field guide](docs/START-HERE.html).
+- **Want a 2-minute picture first?** Read the architecture diagram above; it is an image, not a configuration file.
 - **Ready to create cloud resources?** Read [cost and safety](docs/cost-and-safety.md), then return to the beginner workshop guide.
-- **Blocked on a technical step?** Open [technical reference](docs/REFERENCE.md) only for that step.
+- **Blocked on a technical step?** Ask a technical owner to use [technical reference](docs/REFERENCE.md). It intentionally contains configuration details.
 
 > **Business question this workshop helps answer:** Can we connect a controlled China Mainland public ingress to the same application origin in another Tencent Cloud region through a reviewed CCN private network path, validate application continuity, and identify what must be completed before production design or commercial evaluation?
 
@@ -154,8 +146,8 @@ Bring the completed verification checklist and architecture notes to your Tencen
 
 1. Read [Cost and safety guardrails](docs/cost-and-safety.md) before creating billable resources.
 2. Follow [Start here: your first CCN cross-border workshop](docs/START-HERE.md) from Step 1 through Step 8. It explains the goal, audience, prerequisites, build sequence, expected result, and common questions in plain language.
-3. Open the [visual field guide](docs/START-HERE.html) only if a diagram helps before you start.
-4. Use [technical reference](docs/REFERENCE.md) only when a workshop step needs deployment, verification, or measurement detail.
+3. Use the architecture picture at the top of this page for the visual overview.
+4. Ask a technical owner to use [technical reference](docs/REFERENCE.md) only when a workshop step needs deployment, verification, or measurement detail.
 5. Follow [cleanup procedure](docs/cleanup.md) when the lab ends.
 
 Maintainers can use [release checklist](docs/release-checklist.md) before public GitHub changes.
@@ -239,13 +231,15 @@ See [`docs/REFERENCE.md`](docs/REFERENCE.md) for evidence boundaries, deployment
 
 ---
 
-## Reference infrastructure
+## Technical implementation references (technical owner only)
 
-- [`infra/nginx/us-demo.conf.example`](infra/nginx/us-demo.conf.example) hosts the static demo and proxies the local Node service.
-- [`infra/nginx/guangzhou-ingress.conf.example`](infra/nginx/guangzhou-ingress.conf.example) accepts only `/healthz` and `/ws`, then proxies to a US private origin with TLS/SNI verification enabled.
-- [`infra/terraform/`](infra/terraform/) is a safe planning scaffold, not a representation of a deployed account.
+The following files are configuration examples, so GitHub displays them as code. New workshop participants do **not** need to open them:
 
-Before testing a real routed path, complete the applicable Tencent Cloud cross-border compliance and commercial process. Verify topology and route health independently; server ACK metadata alone does not prove browser ingress or CCN routing.
+- `infra/nginx/us-demo.conf.example`: US Nginx configuration for the static demo and local Node ACK service.
+- `infra/nginx/guangzhou-ingress.conf.example`: Guangzhou Nginx configuration for `/healthz` and `/ws` to the US private origin, including TLS/SNI verification.
+- `infra/terraform/`: a safe planning scaffold, not a deployed-account template or executable cross-border build.
+
+Use these only with a technical owner after the relevant Workshop step calls for configuration. Before testing a real routed path, complete the applicable Tencent Cloud cross-border compliance and commercial process. Verify topology and route health independently; server ACK metadata alone does not prove browser ingress or CCN routing.
 
 ---
 

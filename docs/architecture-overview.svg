@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">CCN Workshop architecture</title>
+  <desc id="desc">A China Mainland visitor reaches a Guangzhou public ingress. The ingress forwards application traffic over Cloud Connect Network to a private application origin in Tencent Cloud Silicon Valley. A dashed line shows the Direct control path over the public Internet.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#f8fbff"/>
+      <stop offset="1" stop-color="#eef5ff"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2d6cdf"/>
+    </marker>
+    <marker id="muted-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#7b8da3"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="560" rx="28" fill="url(#bg)"/>
+  <text x="64" y="72" fill="#12243a" font-family="Arial, sans-serif" font-size="32" font-weight="700">CCN Workshop: China Mainland to Overseas Application</text>
+  <text x="64" y="108" fill="#5b708a" font-family="Arial, sans-serif" font-size="18">Functional path validation. Results are application ACK evidence, not a latency or SLA guarantee.</text>
+
+  <path d="M260 255 H350" fill="none" stroke="#2d6cdf" stroke-width="6" marker-end="url(#arrow)"/>
+  <path d="M550 255 H650" fill="none" stroke="#2d6cdf" stroke-width="6" marker-end="url(#arrow)"/>
+  <path d="M850 255 H940" fill="none" stroke="#2d6cdf" stroke-width="6" marker-end="url(#arrow)"/>
+  <path d="M940 286 H850" fill="none" stroke="#79a7f5" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M650 286 H550" fill="none" stroke="#79a7f5" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M350 286 H260" fill="none" stroke="#79a7f5" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <g font-family="Arial, sans-serif">
+    <rect x="64" y="180" width="196" height="180" rx="18" fill="#ffffff" stroke="#bfd2ee" stroke-width="2"/>
+    <text x="162" y="224" text-anchor="middle" fill="#2d6cdf" font-size="17" font-weight="700">CHINA MAINLAND</text>
+    <text x="162" y="267" text-anchor="middle" fill="#12243a" font-size="23" font-weight="700">Visitor Browser</text>
+    <text x="162" y="301" text-anchor="middle" fill="#5b708a" font-size="16">HTTPS / WSS</text>
+    <text x="162" y="327" text-anchor="middle" fill="#5b708a" font-size="16">Command + ACK</text>
+
+    <rect x="350" y="180" width="200" height="180" rx="18" fill="#ffffff" stroke="#bfd2ee" stroke-width="2"/>
+    <text x="450" y="224" text-anchor="middle" fill="#2d6cdf" font-size="17" font-weight="700">PUBLIC ON-RAMP</text>
+    <text x="450" y="267" text-anchor="middle" fill="#12243a" font-size="22" font-weight="700">Guangzhou Ingress</text>
+    <text x="450" y="301" text-anchor="middle" fill="#5b708a" font-size="16">EIP + CVM + Nginx</text>
+    <text x="450" y="327" text-anchor="middle" fill="#5b708a" font-size="16">/healthz and /ws only</text>
+
+    <rect x="650" y="180" width="200" height="180" rx="18" fill="#e4efff" stroke="#2d6cdf" stroke-width="3"/>
+    <text x="750" y="224" text-anchor="middle" fill="#1e59bb" font-size="17" font-weight="700">PRIVATE NETWORK</text>
+    <text x="750" y="267" text-anchor="middle" fill="#12243a" font-size="24" font-weight="700">Cloud Connect</text>
+    <text x="750" y="295" text-anchor="middle" fill="#12243a" font-size="24" font-weight="700">Network (CCN)</text>
+    <text x="750" y="327" text-anchor="middle" fill="#355b93" font-size="16">Guangzhou ↔ Silicon Valley</text>
+
+    <rect x="940" y="180" width="196" height="180" rx="18" fill="#ffffff" stroke="#bfd2ee" stroke-width="2"/>
+    <text x="1038" y="224" text-anchor="middle" fill="#2d6cdf" font-size="17" font-weight="700">TENCENT CLOUD</text>
+    <text x="1038" y="267" text-anchor="middle" fill="#12243a" font-size="22" font-weight="700">Silicon Valley VPC</text>
+    <text x="1038" y="301" text-anchor="middle" fill="#5b708a" font-size="16">Private application origin</text>
+    <text x="1038" y="327" text-anchor="middle" fill="#5b708a" font-size="16">Same ACK service</text>
+  </g>
+
+  <path d="M162 448 C360 514, 840 514, 1038 448" fill="none" stroke="#7b8da3" stroke-width="3" stroke-dasharray="10 10" marker-end="url(#muted-arrow)"/>
+  <text x="600" y="503" text-anchor="middle" fill="#596d84" font-family="Arial, sans-serif" font-size="17">Direct control path: Browser → Public Internet → same ACK service</text>
+</svg>

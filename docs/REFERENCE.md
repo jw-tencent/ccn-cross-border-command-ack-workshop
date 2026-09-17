@@ -1,6 +1,8 @@
 # Technical reference: architecture, deployment, and validation
 
-Use this document **only when you need detail while following [START-HERE.md](START-HERE.md)**. It combines the previous architecture, deployment, verification, and fair-test notes so new customers do not have to decide among several overlapping guides.
+> **Technical owner only:** this document contains commands and Nginx configuration examples. If you are new to Tencent Cloud, stay in [START-HERE.md](START-HERE.md) and ask a technical owner to use this reference when a specific workshop step requires it.
+
+It combines architecture, deployment, verification, and fair-test notes so the beginner workshop can stay focused on the build sequence.
 
 ## 1. The two paths and the evidence boundary
 

@@ -9,7 +9,7 @@ const APP_PATH = path.join(__dirname, '..', 'app', 'app.js');
 const INDEX_PATH = path.join(__dirname, '..', 'app', 'index.html');
 const CONFIG_PATH = path.join(__dirname, '..', 'app', 'demo-config.js');
 const START_HERE_MD_PATH = path.join(__dirname, '..', 'docs', 'START-HERE.md');
-const START_HERE_HTML_PATH = path.join(__dirname, '..', 'docs', 'START-HERE.html');
+const ARCHITECTURE_SVG_PATH = path.join(__dirname, '..', 'docs', 'architecture-overview.svg');
 const README_PATH = path.join(__dirname, '..', 'README.md');
 const REQUIRED_UNAVAILABLE_MESSAGE = 'CCN routed-path telemetry is unavailable until a reviewed Guangzhou ingress, CCN route, US private origin, and distinct WSS endpoint are configured and validated.';
 
@@ -63,16 +63,18 @@ test('customer-facing statuses distinguish Direct, routed CCN, unavailable, and 
 test('new customers have one clear workshop path before technical quick-start material', () => {
   const readme = fs.readFileSync(README_PATH, 'utf8');
   const startHere = fs.readFileSync(START_HERE_MD_PATH, 'utf8');
-  const visualGuide = fs.readFileSync(START_HERE_HTML_PATH, 'utf8');
+  const architectureSvg = fs.readFileSync(ARCHITECTURE_SVG_PATH, 'utf8');
 
   assert.match(readme, /# Tencent Cloud Cloud Connect Network \(CCN\) Beginner Workshop/);
   assert.match(readme, /Official Tencent Cloud CCN documentation: \[English\].*\[Chinese\]/);
   assert.match(readme, /Are you experiencing high latency when visitors in China Mainland access websites or applications hosted overseas\?/);
   assert.match(readme, /## Architecture: China Mainland visitor to overseas application/);
-  assert.match(readme, /flowchart LR/);
-  assert.match(readme, /Guangzhou public ingress/);
-  assert.match(readme, /Cloud Connect Network/);
-  assert.match(readme, /Silicon Valley VPC/);
+  assert.match(readme, /docs\/architecture-overview\.svg/);
+  assert.doesNotMatch(readme, /START-HERE\.html/);
+  assert.match(architectureSvg, /<svg/);
+  assert.match(architectureSvg, /Guangzhou Ingress/);
+  assert.match(architectureSvg, /Cloud Connect/);
+  assert.match(architectureSvg, /Silicon Valley VPC/);
   assert.match(readme, /## How CCN supports the optimization design/);
   assert.match(readme, /customer-specific/);
   assert.match(readme, /## New to CCN\? Start the workshop/);
@@ -90,6 +92,6 @@ test('new customers have one clear workshop path before technical quick-start ma
   assert.match(startHere, /### Step 8 — Close the workshop safely/);
   assert.match(startHere, /China Mainland test client/);
   assert.match(startHere, /not a latency benchmark, price quote, SLA test/);
-  assert.match(visualGuide, /Build the on-ramp/);
-  assert.match(visualGuide, /Start the full workshop/);
+  assert.match(startHere, /Console first, Terraform later/);
+  assert.match(readme, /configuration examples, so GitHub displays them as code/);
 });
