@@ -64,6 +64,15 @@ test('new customers have one clear workshop path before technical quick-start ma
   const startHere = fs.readFileSync(START_HERE_MD_PATH, 'utf8');
   const visualGuide = fs.readFileSync(START_HERE_HTML_PATH, 'utf8');
 
+  assert.match(readme, /# 腾讯云 Cloud Connect Network（CCN）Beginner Workshop/);
+  assert.match(readme, /Are you experiencing high latency when visitors in China Mainland access websites or applications hosted overseas\?/);
+  assert.match(readme, /## Architecture: China Mainland visitor to overseas application/);
+  assert.match(readme, /flowchart LR/);
+  assert.match(readme, /Guangzhou public ingress/);
+  assert.match(readme, /Cloud Connect Network/);
+  assert.match(readme, /Silicon Valley VPC/);
+  assert.match(readme, /## How CCN supports the optimization design/);
+  assert.match(readme, /customer-specific/);
   assert.match(readme, /## New to CCN\? Start the workshop/);
   assert.match(readme, /Open the beginner workshop guide/);
   assert.match(readme, /You do not need to understand the code or run Local Quick Start first/);

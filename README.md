@@ -1,6 +1,33 @@
-# CCN Cross-Border Command-to-ACK Workshop
+# 腾讯云 Cloud Connect Network（CCN）Beginner Workshop
 
-A customer-facing workshop for understanding **Tencent Cloud Cloud Connect Network (CCN)** through a small, observable application path.
+**Are you experiencing high latency when visitors in China Mainland access websites or applications hosted overseas?**
+
+This customer-facing workshop shows how to evaluate a controlled China Mainland public ingress and a CCN-connected private network segment to the same overseas application origin. CCN can provide private connectivity between associated Tencent Cloud network instances; this workshop helps you validate the configured application path before production planning.
+
+> **Important:** do not present CCN as a guaranteed latency reduction or stability improvement. The actual result depends on the complete design, regions, ISP/last-mile path, application, bandwidth configuration, and test conditions. This workshop records functional Command-to-ACK evidence, not a CCN latency benchmark or SLA.
+
+## Architecture: China Mainland visitor to overseas application
+
+```mermaid
+flowchart LR
+  Visitor[China Mainland visitor<br/>Browser] <-->|HTTPS/WSS<br/>Command and matching ACK| GZ[Guangzhou public ingress<br/>EIP + CVM + Nginx]
+  GZ <-->|Private application traffic| CCN[Cloud Connect Network<br/>Guangzhou <-> Silicon Valley]
+  CCN <-->|Private routing| SV[Tencent Cloud<br/>Silicon Valley VPC]
+  SV <-->|Local reverse proxy| App[Private application origin<br/>Same ACK service]
+
+  Visitor -. Direct control path over Public Internet .-> App
+```
+
+**Traffic flow:** the browser enters the public Guangzhou ingress, which forwards application traffic through the reviewed CCN private segment to the private Silicon Valley application origin. The matching ACK returns along the configured path. The dotted Direct control path reaches the same ACK service without the Guangzhou ingress and CCN segment.
+
+### How CCN supports the optimization design
+
+1. **Create a controlled on-ramp:** the visitor enters a Guangzhou public endpoint rather than connecting directly to the overseas application origin for the routed test.
+2. **Connect the private cloud networks:** CCN associates the Guangzhou and Silicon Valley VPCs and provides the private network segment between them.
+3. **Inspect routes and configure the eligible bandwidth path:** validate routes, security controls, approval, and bandwidth before allowing public routed traffic.
+4. **Measure the complete application path:** compare Direct and routed Command-to-ACK results under matched China Mainland test conditions. This is how the team can determine whether the design improves its own latency and stability objectives; it is not assumed in advance.
+
+**VERIFIED — CCN supports private connectivity between associated VPCs and automatically syncs route information in the CCN route table.** See Tencent Cloud [CCN Overview](https://www.tencentcloud.com/document/product/1003/30049). The end-to-end latency and stability outcome remains **customer-specific** and must be validated with the complete application and access network.
 
 ## New to CCN? Start the workshop
 
@@ -13,14 +40,6 @@ It is the one guide to follow from beginning to end. It explains the goal, who t
 - **Blocked on a technical step?** Open [technical reference](docs/REFERENCE.md) only for that step.
 
 > **Business question this workshop helps answer:** Can we connect a controlled China Mainland public ingress to the same application origin in another Tencent Cloud region through a reviewed CCN private network path, validate application continuity, and identify what must be completed before production design or commercial evaluation?
-
-```text
-Direct control path
-Browser -> Public Internet -> US ACK origin
-
-Configured routed path
-Browser -> Guangzhou public ingress -> Guangzhou <-> Silicon Valley CCN -> Silicon Valley private origin -> same ACK service
-```
 
 The workshop records a result only after the browser receives a matching acknowledgement for the command it sent. It gives teams an evidence-based way to discuss topology, reachability, security boundaries, operational readiness, and the next CCN evaluation step.
 
