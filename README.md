@@ -27,13 +27,15 @@ This customer-facing workshop shows how to evaluate a controlled China Mainland 
 
 **[Open the beginner workshop guide ->](docs/START-HERE.md)**
 
-It is the one guide to follow from beginning to end. It explains the goal, who this is for, what you need, each build step, expected results, common problems, and cleanup. **You do not need to understand the code or run Local Quick Start first.**
+It is the one guide to follow from beginning to end. It explains the goal, who this is for, what you need, each build step, expected results, common problems, and cleanup. **You do not need to understand the code or run Local Quick Start first.** A complete cloud build does require named technical, network/security, and account/compliance owners.
+
+### Start in three actions
+
+1. **Understand the picture:** read the architecture diagram above. It is an image, not a configuration file.
+2. **Confirm your readiness:** open the [beginner workshop guide](docs/START-HERE.md) and complete its role and readiness gate before creating any resource.
+3. **Build with the right owners:** read [cost and safety](docs/cost-and-safety.md), then use the [Console build checklist](docs/CONSOLE-CHECKLIST.md) with your technical owner. Use [technical reference](docs/REFERENCE.md) only when a specific deployment step requires it.
 
 > **Build method:** this is a **Tencent Cloud Console-first** workshop. Create the US CVM first, validate the Direct path, then create the Guangzhou CVM, CCN, and routed path. Do **not** run Terraform at the start: the current Terraform folder is a safe reference scaffold, not an executable deployment.
-
-- **Want a 2-minute picture first?** Read the architecture diagram above; it is an image, not a configuration file.
-- **Ready to create cloud resources?** Read [cost and safety](docs/cost-and-safety.md), then return to the beginner workshop guide.
-- **Blocked on a technical step?** Ask a technical owner to use [technical reference](docs/REFERENCE.md). It intentionally contains configuration details.
 
 > **Business question this workshop helps answer:** Can we connect a controlled China Mainland public ingress to the same application origin in another Tencent Cloud region through a reviewed CCN private network path, validate application continuity, and identify what must be completed before production design or commercial evaluation?
 
@@ -145,10 +147,12 @@ Bring the completed verification checklist and architecture notes to your Tencen
 **Do not begin with Local Quick Start unless you are the technical owner.** New customers should follow one complete, beginner-first guide:
 
 1. Read [Cost and safety guardrails](docs/cost-and-safety.md) before creating billable resources.
-2. Follow [Start here: your first CCN cross-border workshop](docs/START-HERE.md) from Step 1 through Step 8. It explains the goal, audience, prerequisites, build sequence, expected result, and common questions in plain language.
-3. Use the architecture picture at the top of this page for the visual overview.
-4. Ask a technical owner to use [technical reference](docs/REFERENCE.md) only when a workshop step needs deployment, verification, or measurement detail.
-5. Follow [cleanup procedure](docs/cleanup.md) when the lab ends.
+2. Follow [Start here: your first CCN cross-border workshop](docs/START-HERE.md) from Step 1 through Step 8. Complete its role and readiness gate before resource creation.
+3. Use the [Console build checklist](docs/CONSOLE-CHECKLIST.md) with the technical, network/security, and account/compliance owners. It defines the go/no-go gate for each build stage.
+4. Use the architecture picture at the top of this page for the visual overview.
+5. Ask a technical owner to use [technical reference](docs/REFERENCE.md) only when a workshop step needs deployment, verification, or measurement detail.
+6. Record the final matched comparison with [test record template](docs/TEST-RECORD-TEMPLATE.md).
+7. Follow [cleanup procedure](docs/cleanup.md) when the lab ends.
 
 Maintainers can use [release checklist](docs/release-checklist.md) before public GitHub changes.
 

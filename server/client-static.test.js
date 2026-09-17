@@ -9,6 +9,8 @@ const APP_PATH = path.join(__dirname, '..', 'app', 'app.js');
 const INDEX_PATH = path.join(__dirname, '..', 'app', 'index.html');
 const CONFIG_PATH = path.join(__dirname, '..', 'app', 'demo-config.js');
 const START_HERE_MD_PATH = path.join(__dirname, '..', 'docs', 'START-HERE.md');
+const CONSOLE_CHECKLIST_PATH = path.join(__dirname, '..', 'docs', 'CONSOLE-CHECKLIST.md');
+const TEST_RECORD_TEMPLATE_PATH = path.join(__dirname, '..', 'docs', 'TEST-RECORD-TEMPLATE.md');
 const ARCHITECTURE_SVG_PATH = path.join(__dirname, '..', 'docs', 'architecture-overview.svg');
 const README_PATH = path.join(__dirname, '..', 'README.md');
 const REQUIRED_UNAVAILABLE_MESSAGE = 'CCN routed-path telemetry is unavailable until a reviewed Guangzhou ingress, CCN route, US private origin, and distinct WSS endpoint are configured and validated.';
@@ -63,6 +65,8 @@ test('customer-facing statuses distinguish Direct, routed CCN, unavailable, and 
 test('new customers have one clear workshop path before technical quick-start material', () => {
   const readme = fs.readFileSync(README_PATH, 'utf8');
   const startHere = fs.readFileSync(START_HERE_MD_PATH, 'utf8');
+  const consoleChecklist = fs.readFileSync(CONSOLE_CHECKLIST_PATH, 'utf8');
+  const testRecordTemplate = fs.readFileSync(TEST_RECORD_TEMPLATE_PATH, 'utf8');
   const architectureSvg = fs.readFileSync(ARCHITECTURE_SVG_PATH, 'utf8');
 
   assert.match(readme, /# Tencent Cloud Cloud Connect Network \(CCN\) Beginner Workshop/);
@@ -87,11 +91,20 @@ test('new customers have one clear workshop path before technical quick-start ma
   assert.ok(readme.indexOf('Open the beginner workshop guide') < readme.indexOf('## Why customers consider CCN'));
   assert.match(startHere, /## 1\. Workshop goal/);
   assert.match(startHere, /## 2\. Who this workshop is for/);
-  assert.match(startHere, /## 3\. Before you create anything/);
+  assert.match(startHere, /## 3\. Beginner launchpad: choose your role before you build/);
+  assert.match(startHere, /Readiness gate — do not create resources until every item has an owner/);
+  assert.match(startHere, /## 4\. Before you create anything/);
+  assert.match(startHere, /CONSOLE-CHECKLIST\.md/);
+  assert.match(startHere, /TEST-RECORD-TEMPLATE\.md/);
   assert.match(startHere, /### Step 1 — Choose your safe lab design/);
   assert.match(startHere, /### Step 8 — Close the workshop safely/);
   assert.match(startHere, /China Mainland test client/);
   assert.match(startHere, /not a latency benchmark, price quote, SLA test/);
   assert.match(startHere, /Console first, Terraform later/);
+  assert.match(readme, /Console build checklist/);
   assert.match(readme, /configuration examples, so GitHub displays them as code/);
+  assert.match(consoleChecklist, /## 4\. CCN and private-path gate/);
+  assert.match(consoleChecklist, /do not enable routed WSS yet/i);
+  assert.match(testRecordTemplate, /functional application-path validation/);
+  assert.match(testRecordTemplate, /does not create a latency benchmark, CCN-link measurement, SLA statement, or performance guarantee/);
 });

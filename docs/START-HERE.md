@@ -1,6 +1,6 @@
 # Start here: your first CCN cross-border workshop
 
-This is the **main workshop guide**. Follow it from top to bottom. You do **not** need to understand the code or start with the local command line.
+This is the **main workshop guide**. Follow it from top to bottom. You do **not** need to understand the code or start with the local command line. You do need the right people: a customer/project owner, a technical owner, and owners for budget and cross-border approval.
 
 ## 1. Workshop goal
 
@@ -41,7 +41,38 @@ Do **not** use this as a generic website-acceleration tutorial. CCN is the priva
 
 A browser reaches the public front door first. It does not connect to CCN directly.
 
-## 3. Before you create anything
+## 3. Beginner launchpad: choose your role before you build
+
+This is a guided customer workshop, not a one-person, one-click deployment. Use the role that matches your responsibility; do not guess on a task owned by another role.
+
+| Role | What you do in this workshop | Your main decision |
+|---|---|---|
+| **Customer or project owner** | Defines the business scenario, lab scope, resource owner, expiry date, and next decision. | Is this a suitable CCN evaluation, and may the lab proceed? |
+| **Technical owner** | Runs the sample preflight, creates CVMs/VPCs/EIPs, deploys Nginx and the ACK service, configures DNS/TLS, and sets endpoint configuration. | Is each application endpoint working safely? |
+| **Network and security owner** | Approves non-overlapping CIDRs, security-group access, CCN associations, routes, and private-origin access. | Is the private path valid and appropriately exposed? |
+| **Account, budget, and compliance owner** | Confirms account permissions, budget, cross-border eligibility, applicable approval, and bandwidth/commercial workflow. | Are you permitted and ready to create this cross-border lab? |
+| **Test owner** | Runs the matched Direct and routed tests from a suitable China Mainland client and records successes and failures. | Did both configured application paths return matching ACKs? |
+
+### Pick the right path
+
+- **I only need to understand CCN:** Read the goal, mental model, and architecture in the README. You do not need to create cloud resources.
+- **I am coordinating a customer evaluation:** Complete the readiness gate below, then work with the named technical, network/security, and account owners through Steps 1–8.
+- **I am the technical owner:** Complete the readiness gate, then follow the workshop steps. Use [REFERENCE.md](REFERENCE.md) only when a step calls for technical deployment or troubleshooting detail.
+
+### Readiness gate — do not create resources until every item has an owner
+
+| Check | Ready when | If not ready |
+|---|---|---|
+| Lab purpose | The team has documented the user location, application direction, and what it wants to validate. | Stay at the architecture-review stage. |
+| Account and budget | A permitted Tencent Cloud account, budget owner, resource owner, and expiry date are confirmed. | Do not create CVMs, EIPs, CCN, or bandwidth resources. |
+| Technical ownership | A named technical owner can operate CVM, DNS, TLS, Nginx, and endpoint configuration. | Do not begin the deployment steps. |
+| Network and security | A network/security owner can approve CIDRs, routes, and public administrative access. | Do not connect VPCs or expose an ingress. |
+| Cross-border gate | The account/compliance owner has confirmed the current eligibility and applicable approval workflow. | Do not order or enable cross-border bandwidth; obtain the required guidance first. |
+| Final test client | A suitable China Mainland test client is identified for the final matched comparison. | You may check setup elsewhere, but do not present the result as China Mainland experience. |
+
+**Go / no-go rule:** proceed to Step 1 only when the lab, account/budget, technical, network/security, and cross-border owners are clear. A missing owner is a stop condition, not a detail to solve later.
+
+## 4. Before you create anything
 
 ### Required decisions
 
@@ -61,26 +92,35 @@ Confirm these items with the people who own the application, network, security, 
 
 Before creating a CVM or EIP, read [cost-and-safety.md](cost-and-safety.md). It lists possible billable resources, minimum security controls, and stop conditions.
 
-### Tiny glossary
+### Words you need today
 
-| Term | Meaning in this workshop |
-|---|---|
-| **VPC** | A private Tencent Cloud network in one region. |
-| **CVM** | A virtual machine that runs Nginx or the ACK service. |
-| **EIP** | A public IP address used by browsers to reach an ingress. |
-| **CCN** | The private network connection between associated VPCs. |
-| **Nginx** | The public web gateway that receives HTTPS/WSS and forwards it. |
-| **ACK** | A small acknowledgement message showing that the application received a command and replied. |
+| Group | Term | Meaning in this workshop |
+|---|---|---|
+| Private network | **VPC** | A private Tencent Cloud network in one region. The workshop uses one in Guangzhou and one in Silicon Valley. |
+| Private network | **CIDR** | The address range of a VPC, such as `10.10.0.0/16`. The Guangzhou and Silicon Valley ranges must not overlap. |
+| Private network | **Subnet** | A smaller address range inside a VPC where a CVM is placed. |
+| Private network | **Route table** | The network map that tells a VPC where to send traffic for another private address range. |
+| Compute | **CVM** | A virtual machine that runs Nginx or the ACK service. |
+| Public access | **EIP** | A public IP address that lets a browser reach the Direct endpoint or Guangzhou ingress. |
+| Public access | **DNS name** | A human-readable endpoint name, such as `demo.example.com`, that points to an EIP. |
+| Public access | **TLS / WSS** | TLS secures the browser connection; WSS is Secure WebSocket, used here to send a command and receive an ACK. |
+| Connectivity | **CCN** | The private connectivity layer between associated VPCs. A browser does not connect to it directly. |
+| Connectivity | **Private origin** | The Silicon Valley application endpoint reached from Guangzhou through the private network path. |
+| Security | **Security group** | Firewall rules that control which traffic can reach a CVM. |
+| Security | **Nginx** | The web gateway that receives HTTPS/WSS and forwards it to the local service or private origin. |
+| Validation | **ACK** | A small acknowledgement message showing that the application received a command and replied. |
 
-Need more detail? See [REFERENCE.md](REFERENCE.md) while you are on a specific step. You do not need to read it first.
+Need more detail? See [REFERENCE.md](REFERENCE.md) only while you are on a specific technical step. You do not need to read it first.
 
 ---
 
-## 4. How to follow this workshop: Console first, Terraform later
+## 5. How to follow this workshop: Console first, Terraform later
 
 **This is a console-first workshop. Do not run Terraform at the beginning.** Build the small topology manually once so you can see which resource performs each role and diagnose a failure without guessing.
 
 The current `infra/terraform/` directory is a **safe reference scaffold**. It contains versions, variables, and example values only; it does not include an executable `main.tf` that creates the topology. Therefore, it is not a workshop step to run `terraform apply`.
+
+Before a technical owner opens the deployment references, use the [Console build checklist](CONSOLE-CHECKLIST.md). It gives each role a clear go/no-go condition; it does not expose production configuration or replace account-specific Console guidance.
 
 | When | Where you work | What you do | Do not do yet |
 |---|---|---|---|
@@ -101,7 +141,7 @@ If you are following this for the first time, stay in the Tencent Cloud Console 
 
 ---
 
-## 5. Workshop steps
+## 6. Workshop steps
 
 Complete the steps in this order. Do not enable the routed browser endpoint before Step 6.
 
@@ -128,9 +168,9 @@ You have a written topology, two distinct hostnames, non-overlapping CIDRs, and 
 
 ---
 
-### Step 2 — Run the application locally (optional but recommended)
+### Step 2 — Technical-owner application preflight
 
-This step checks the sample application before cloud resources are created. Skip it only if a technical owner has already validated the repository.
+**Technical owner only.** This step checks the sample application before cloud resources are created. The customer or project owner should ask the technical owner to confirm this preflight passed; they do not need to run these commands themselves.
 
 **Do**
 
@@ -285,7 +325,7 @@ window.CCN_DEMO_CONFIG = Object.freeze({
 1. Use the same China Mainland client/network, browser version, command payload/count, US backend version, and time window for both paths.
 2. Run Direct first, then routed.
 3. Keep both success and failure counts.
-4. Record the client location/network, endpoint condition, time, command count, and raw application ACK results.
+4. Record the client location/network, endpoint condition, time, command count, and raw application ACK results using [TEST-RECORD-TEMPLATE.md](TEST-RECORD-TEMPLATE.md).
 
 **Expected result**
 
@@ -314,7 +354,7 @@ Follow the full [cleanup procedure](cleanup.md). Do not assume deleting a CVM au
 
 ---
 
-## 5. Common questions
+## 7. Common questions
 
 ### “Why does the workshop have Direct and routed paths?”
 
@@ -336,8 +376,10 @@ That is intentional. Guangzhou is a narrow ingress proxy for `/healthz` and `/ws
 
 Not safely for the entire cross-border process. Terraform can describe some foundation resources, but it does not replace account-specific compliance, bandwidth, commercial approval, DNS, TLS, security review, or production ownership. See [`../infra/terraform/README.md`](../infra/terraform/README.md).
 
-## 6. When you need more detail
+## 8. When you need more detail
 
+- Role ownership, Console go/no-go gates, and build sequence: [CONSOLE-CHECKLIST.md](CONSOLE-CHECKLIST.md)
+- Customer test record and outcome wording: [TEST-RECORD-TEMPLATE.md](TEST-RECORD-TEMPLATE.md)
 - Technical architecture, Nginx, exact verification checks, fair-test rules, and developer protocol: [REFERENCE.md](REFERENCE.md)
 - Cost, security, and stop conditions: [cost-and-safety.md](cost-and-safety.md)
 - Cleanup: [cleanup.md](cleanup.md)
